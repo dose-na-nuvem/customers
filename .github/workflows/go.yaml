@@ -21,6 +21,9 @@ jobs:
       with:
         go-version: 1.19
 
+    - name: Lint
+      run: golangci-lint run -c ./.github/workflows/.golangci.yaml ./...
+
     - name: Build
       run: go build -v ./...
 
