@@ -3,7 +3,7 @@ Cadastro dos nossos clientes
 
 # How to run lint locally
 
-> golangci-lint run -c ./.github/workflows/.golangci.yaml
+> golangci-lint run ./...
 
 # Project's Toolkit
 
