@@ -5,14 +5,66 @@
 run:
   # The default concurrency value is the number of available CPU.
   concurrency: 2
+  timeout: 1m
+  issues-exit-code: 1
+  tests: true
+  build-tags: []
+  skip-dirs: []
+  skip-dirs-use-default: true
+  skip-files: []
+  modules-download-mode: readonly
+  allow-parallel-runners: false
+  # Define the Go version limit.
+  # Use the same version as the project.
+  go: "1.19"
 
 # output configuration options
 output:
-
-# All available settings of specific linters.
-linters-settings:
+  print-issued-lines: true
+  print-linter-name: true
+  unique-by-line: true
+  format: github-actions
 
 linters:
+  enable-all: false
+  disable-all: true
+  fast: true
+  # List of enabled linters.
+  # Default: [].
+  enable:
+    - bodyclose
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - exportloopref
+    - funlen
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - gomnd
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - nakedret
+    - noctx
+    - nolintlint
+    - revive
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
   presets:
     - bugs
     - comment
@@ -27,10 +79,14 @@ linters:
     - style
     - test
     - unused
-  # Run only fast linters from enabled linters set (first run won't be fast)
-  fast: true
 
 issues:
+  exclude-use-default: true
+  exclude-case-sensitive: false
+  max-issues-per-linter: 50
+  max-same-issues: 3
+  new: false
 
 severity:
-
+  default-severity: warning
+  case-sensitive: false
