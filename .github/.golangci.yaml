@@ -1,0 +1,10 @@
+run:
+  skip-dirs-use-default: true
+  tests: true
+linters:
+  enable-all: true
+  disable:
+    - gochecknoglobals
+    - interfacer
+
+#Alerta: Código gerado pelo "estagiario". Nome do estagiario "ChatGPT3".
