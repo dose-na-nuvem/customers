@@ -1,0 +1,36 @@
+# See the detailed configuration at
+# https://golangci-lint.run/usage/configuration
+
+# Options for analysis running.
+run:
+  # The default concurrency value is the number of available CPU.
+  concurrency: 2
+
+# output configuration options
+output:
+
+# All available settings of specific linters.
+linters-settings:
+
+linters:
+  presets:
+    - bugs
+    - comment
+    - complexity
+    - error
+    - format
+    - import
+    - metalinter
+    - module
+    - performance
+    - sql
+    - style
+    - test
+    - unused
+  # Run only fast linters from enabled linters set (first run won't be fast)
+  fast: true
+
+issues:
+
+severity:
+
