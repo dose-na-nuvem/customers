@@ -1,14 +1,7 @@
 package main
 
-import (
-	"fmt"
-)
+import "github.com/dose-na-nuvem/customers/cmd"
 
 func main() {
-	msg := message()
-	fmt.Println(msg)
-}
-
-func message() string {
-	return "hello world"
+	cmd.Execute()
 }
