@@ -31,14 +31,15 @@ var startCmd = &cobra.Command{
 		return configViperCfgWithCobraFlags(cmd)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg.Logger.Info("banco de dados obtido", zap.String("db.type", cfg.DbType))
+		// os flags compostos devem usar a forma com sublinhado
+		cfg.Logger.Info("banco de dados obtido", zap.String("db_type", cfg.DbType))
 		server.Serve(cfg)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().StringVar(&cfg.DbType, "dbtype", "<a definir>", "Tipo do banco de dados a ser utilizado.")
+	startCmd.Flags().StringVar(&cfg.DbType, "db_type", "<a definir>", "Tipo do banco de dados a ser utilizado.")
 }
 
 // Configura um comando do cobra com ajustes necessários ao sincronismo com o viper
