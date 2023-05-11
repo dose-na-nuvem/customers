@@ -18,6 +18,8 @@ var (
 	defaultConfigFilename = "config"
 	defaultConfigPath     = "."
 	envPrefix             = "DOSE"
+	// Troca flags que tenham hifen com camelCase no arquivo de configuração
+	replaceHyphenWithCamelCase = true
 )
 
 // startCmd represents the start command
@@ -86,9 +88,9 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 		configName := f.Name
 		// Se usar camelCase no arquivo de configuração, troca hifens com uma string camelCased
 		// Como o viper faz comparações case-insensitive (ignorando minúsculas e maiúsculas), não precisamos consertar, só remover os hifens.
-		// if replaceHyphenWithCamelCase {
-		// 	configName = strings.ReplaceAll(f.Name, "-", "")
-		// }
+		if replaceHyphenWithCamelCase {
+			configName = strings.ReplaceAll(f.Name, "-", "")
+		}
 
 		// Aplica o valor da configuração viper para a flag quando a flag não estiver definida e a do viper tem um valor
 		if !f.Changed && v.IsSet(configName) {
