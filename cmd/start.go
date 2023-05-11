@@ -18,11 +18,11 @@ var (
 	defaultConfigFilename = "config"
 	defaultConfigPath     = "."
 	envPrefix             = "DOSE"
-	// Troca flags que tenham hifen com camelCase no arquivo de configuração
+	// Troca flags que tenham hifen com camelCase no arquivo de configuração.
 	replaceHyphenWithCamelCase = true
 )
 
-// startCmd represents the start command
+// startCmd represents the start command.
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Inicializa o servidor do microsserviço.",
@@ -42,7 +42,7 @@ func init() {
 	startCmd.Flags().StringVar(&cfg.DbType, "db_type", "<a definir>", "Tipo do banco de dados a ser utilizado.")
 }
 
-// Configura um comando do cobra com ajustes necessários ao sincronismo com o viper
+// Configura um comando do cobra com ajustes necessários ao sincronismo com o viper.
 func configViperCfgWithCobraFlags(cmd *cobra.Command) error {
 	v := viper.New()
 
@@ -54,9 +54,9 @@ func configViperCfgWithCobraFlags(cmd *cobra.Command) error {
 	v.AddConfigPath(defaultConfigPath)
 
 	// Tenta ler o arquivo de configuração, ignorando erros caso o mesmo não seja encontrado
-	// Retorna um erro se não conseguirmos analisar o arquivo de configuração encontrado
+	// Retorna um erro se não conseguirmos analisar o arquivo de configuração encontrado.
 	if err := v.ReadInConfig(); err != nil {
-		// Não há problemas se não existir um arquivo de configuração
+		// Não há problemas se não existir um arquivo de configuração.
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return err
 		}
@@ -82,7 +82,7 @@ func configViperCfgWithCobraFlags(cmd *cobra.Command) error {
 	return nil
 }
 
-// Associa cada 'cobra' flag com sua configuração 'viper' (arquivo de configuração e variáveis de ambiente)
+// Associa cada 'cobra' flag com sua configuração 'viper' (arquivo de configuração e variáveis de ambiente).
 func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
 		// Determina a convenção de nomes para as flags quando definidas no arquivo de configuração
