@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/dose-na-nuvem/customers/config"
 	"github.com/dose-na-nuvem/customers/pkg/server"
@@ -13,6 +14,10 @@ import (
 
 var (
 	cfg = config.New()
+
+	defaultConfigFilename = "config"
+	defaultConfigPath     = "."
+	envPrefix             = "DOSE"
 )
 
 // startCmd represents the start command
@@ -28,6 +33,46 @@ var startCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(startCmd)
 	startCmd.Flags().StringVar(&cfg.DbType, "dbtype", "<a definir>", "Tipo do banco de dados a ser utilizado.")
+}
+
+// Configura um comando do cobra com ajustes necessários ao sincronismo com o viper
+func initializeConfig(cmd *cobra.Command) error {
+	v := viper.New()
+
+	// Configura o nome padrão do arquivo de configuração, sem a extensão.
+	v.SetConfigName(defaultConfigFilename)
+
+	// Configure quantos caminhos forem necessários para o viper buscar o arquivo
+	// Nesse caso especificamente, vamos considerar somente o diretório de trabalho.
+	v.AddConfigPath(defaultConfigPath)
+
+	// Tenta ler o arquivo de configuração, ignorando erros caso o mesmo não seja encontrado
+	// Retorna um erro se não conseguirmos analisar o arquivo de configuração encontrado
+	if err := v.ReadInConfig(); err != nil {
+		// Não há problemas se não existir um arquivo de configuração
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return err
+		}
+	}
+
+	// Variáveis de ambiente não podem ter hifens, então associaremos a uma variável equivalente usando sublinhado
+	// e.g. --cor-favorita será COR_FAVORITA
+	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+
+	// Quando associamos flags às variáveis de ambiente, esperamos que as mesmas estejam prefixadas de alguma forma
+	// e.g. uma flag como --numero associada a uma variavel de ambiente DOSE_NUMERO
+	// Isso evita muitos conflitos quando se executam diversos aplicativos num mesmo ambiente
+	v.SetEnvPrefix(envPrefix)
+
+	// Confirma o uso de variáveis de ambiente
+	// Funciona muito bem para nomes simples, mas precisa de ajustes para nomes compostos como --cor-favorita
+	// que serão ajustados na função bindFlags
+	v.AutomaticEnv()
+
+	// Associa as flags do comando ao viper
+	bindFlags(cmd, v)
+
+	return nil
 }
 
 // Associa cada 'cobra' flag com sua configuração 'viper' (arquivo de configuração e variáveis de ambiente)
