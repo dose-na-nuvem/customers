@@ -14,6 +14,9 @@ permissions:
   # Optional: allow read access to pull request. Use with `only-new-issues` option.
   pull-requests: read
 
+env:
+  GO_VERSION: '1.19'
+
 jobs:
 
   build:
@@ -24,16 +27,19 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: 1.19
-
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
-      with:
-        # Optional: show only new issues if it's a pull request. The default value is `false`.
-        only-new-issues: true
+        go-version: ${{ env.GO_VERSION }}
 
     - name: Build
       run: go build -v ./...
 
     - name: Test
       run: go test -v ./...
+
+    - name: Lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: latest
+        only-new-issues: true
+        skip-cache: true
+        skip-build-cache: true
+        skip-pkg-cache: true
