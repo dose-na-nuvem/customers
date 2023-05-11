@@ -8,3 +8,5 @@ Cadastro dos nossos clientes
 # Project's Toolkit
 
 - https://golangci-lint.run
+
+test
