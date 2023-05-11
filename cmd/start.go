@@ -24,6 +24,10 @@ var (
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Inicializa o servidor do microsserviço.",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// É possível associar cobra e viper em outros lugares, mas PersistencePreRunE na raiz do comando funciona muito bem
+		return configViperCfgWithCobraFlags(cmd)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg.Logger.Info("banco de dados obtido", zap.String("db.type", cfg.DbType))
 		server.Serve(cfg)
@@ -36,7 +40,7 @@ func init() {
 }
 
 // Configura um comando do cobra com ajustes necessários ao sincronismo com o viper
-func initializeConfig(cmd *cobra.Command) error {
+func configViperCfgWithCobraFlags(cmd *cobra.Command) error {
 	v := viper.New()
 
 	// Configura o nome padrão do arquivo de configuração, sem a extensão.
