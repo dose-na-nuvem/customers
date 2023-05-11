@@ -96,7 +96,10 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 		// Aplica o valor da configuração viper para a flag quando a flag não estiver definida e a do viper tem um valor
 		if !f.Changed && v.IsSet(configName) {
 			val := v.Get(configName)
-			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+			err := cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+			if err != nil {
+				cfg.Logger.Error("failed to sync viper.configuration with cobra.flag %s", zap.Error(err))
+			}
 		}
 	})
 }
