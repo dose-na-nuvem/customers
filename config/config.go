@@ -12,5 +12,6 @@ func New() *Cfg {
 	cfg := &Cfg{
 		Logger: zap.Must(zap.NewDevelopment()),
 	}
+
 	return cfg
 }
