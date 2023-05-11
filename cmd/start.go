@@ -88,7 +88,7 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 		// Determina a convenção de nomes para as flags quando definidas no arquivo de configuração
 		configName := f.Name
 		// Se usar camelCase no arquivo de configuração, troca hifens com uma string camelCased
-		// Como o viper faz comparações case-insensitive (ignorando minúsculas e maiúsculas), não precisamos consertar, só remover os hifens.
+		// Como o viper ignora minúsculas e maiúsculas, não precisamos consertar, só remover os hifens.
 		if replaceHyphenWithCamelCase {
 			configName = strings.ReplaceAll(f.Name, "-", "")
 		}
