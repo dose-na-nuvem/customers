@@ -3,7 +3,15 @@ package cmd
 import (
 	"os"
 
+	"github.com/dose-na-nuvem/customers/config"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
+)
+
+var (
+	configFile string
+	cfg        = config.New()
 )
 
 // rootCmd represents the base command when called without any subcommands.
@@ -20,11 +28,59 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	cobra.OnInitialize(initConfig)
+
 	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().StringVar(&cfg.DBType, "dbtype", "<a definir>", "Tipo do banco de dados a ser utilizado.")
+
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "config.yaml",
+		"Define o arquivo de configuração a utilizar.")
+
+	startCmd.Flags().StringVar(&cfg.Database.Type, "db.type", "<a definir>",
+		"Tipo do banco de dados a ser utilizado.")
+
+	startCmd.Flags().StringVar(&cfg.Database.Username, "db.username", "<a definir>",
+		"Usuário do banco de dados a ser utilizado.")
+
+	startCmd.Flags().StringVar(&cfg.Database.Password, "db.password", "<a definir>",
+		"Senha do usuário do banco de dados a ser utilizado.")
+
+	// tie Viper to flags
+	if err := viper.BindPFlags(startCmd.Flags()); err != nil {
+		cfg.Logger.Error("falha ao ligar as flags", zap.Error(err))
+	}
 
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
+	}
+}
+
+func initConfig() {
+	// Configura o nome padrão do arquivo de configuração, sem a extensão.
+	viper.SetConfigFile(configFile)
+
+	// Tenta ler o arquivo de configuração, ignorando erros caso o mesmo não seja encontrado
+	// Retorna um erro se não conseguirmos analisar o arquivo de configuração encontrado.
+	if err := viper.ReadInConfig(); err != nil {
+		// Não há problems se não existir um arquivo de configuração.
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			cfg.Logger.Error("arquivo não encontrado",
+				zap.String("arquivo", configFile),
+				zap.Error(err),
+			)
+
+			return
+		}
+
+		cfg.Logger.Error("falha na leitura do arquivo de configuração", zap.Error(err))
+	} else {
+		cfg.Logger.Info("arquivo de configuração lido", zap.String("config", configFile))
+	}
+
+	// convert Viper's internal state into our configuration object
+	if err := viper.Unmarshal(&cfg); err != nil {
+		cfg.Logger.Error("falhou ao converter o arquivo de configuração", zap.Error(err))
+
+		return
 	}
 }

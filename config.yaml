@@ -1,0 +1,4 @@
+db:
+  type: sqlite
+  username: customers
+  password: secret
