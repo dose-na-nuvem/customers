@@ -27,7 +27,7 @@ output:
 
 linters:
   enable-all: false
-  disable-all: true
+  # disable-all: true
   fast: true
   # List of enabled linters.
   # Default: [].
@@ -52,7 +52,6 @@ linters:
     - govet
     - ineffassign
     - lll
-    - misspell
     - nakedret
     - noctx
     - nolintlint
@@ -64,6 +63,9 @@ linters:
     - unparam
     - unused
     - whitespace
+  disable:
+    - misspell
+
 
   presets:
     - bugs
