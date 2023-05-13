@@ -44,6 +44,9 @@ func Execute() {
 	startCmd.Flags().StringVar(&cfg.Database.Password, "db.password", "<a definir>",
 		"Senha do usuário do banco de dados a ser utilizado.")
 
+	startCmd.Flags().StringVar(&cfg.Server.HTTP.Endpoint, "server.http.endpoint", "localhost:56433",
+		"Endereço onde o serviço vai servir requisições.")
+
 	// tie Viper to flags
 	if err := viper.BindPFlags(startCmd.Flags()); err != nil {
 		cfg.Logger.Error("falha ao ligar as flags", zap.Error(err))

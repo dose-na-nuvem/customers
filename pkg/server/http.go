@@ -1,9 +1,59 @@
 package server
 
 import (
+	"context"
+	"net/http"
+	"time"
+
 	"github.com/dose-na-nuvem/customers/config"
+	"go.uber.org/zap"
 )
 
-func Serve(cfg *config.Cfg) {
-	cfg.Logger.Info("serving...\n")
+type HTTP struct {
+	logger *zap.Logger
+
+	shutdownCh chan struct{}
+	srv        *http.Server
+}
+
+func NewHTTP(cfg *config.Cfg) *HTTP {
+	mux := http.NewServeMux()
+	mux.Handle("/", NewCustomerHandler(cfg.Logger))
+
+	srv := &http.Server{
+		Addr:              cfg.Server.HTTP.Endpoint,
+		Handler:           mux,
+		ReadHeaderTimeout: time.Second,
+	}
+
+	return HTTPWithServer(cfg, srv)
+}
+
+func HTTPWithServer(cfg *config.Cfg, srv *http.Server) *HTTP {
+	return &HTTP{
+		logger:     cfg.Logger,
+		shutdownCh: make(chan struct{}),
+		srv:        srv,
+	}
+}
+
+func (h *HTTP) Start(_ context.Context) error {
+	err := h.srv.ListenAndServe()
+	if err == http.ErrServerClosed {
+		return nil
+	}
+
+	return err
+}
+
+func (h *HTTP) Shutdown(_ context.Context) error {
+	// We received an interrupt signal, shut down.
+	if err := h.srv.Shutdown(context.Background()); err != nil {
+		// Error from closing listeners, or context timeout:
+		return err
+	}
+
+	close(h.shutdownCh)
+
+	return nil
 }
