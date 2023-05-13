@@ -45,9 +45,9 @@ jobs:
         skip-pkg-cache: true
 
     - name: Scan for Vulnerabilities in Code
-      uses: Templum/govulncheck-action@<version>
+      uses: Templum/govulncheck-action@latest
       with:
         go-version: ${{ env.GO_VERSION }}
-        version: latest
+        vulncheck-version: latest
         package: ./...
         fail-on-vuln: true
