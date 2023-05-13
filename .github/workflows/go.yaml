@@ -48,6 +48,6 @@ jobs:
       uses: Templum/govulncheck-action@<version>
       with:
         go-version: ${{ env.GO_VERSION }}
-        vulncheck-version: latest
+        version: latest
         package: ./...
         fail-on-vuln: true
