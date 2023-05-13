@@ -3,9 +3,15 @@ package config
 import "go.uber.org/zap"
 
 type Cfg struct {
-	DBType string `mapstruct:"db_type"`
+	Database Database `mapstructure:"db"`
 
 	Logger *zap.Logger
+}
+
+type Database struct {
+	Type     string `mapstructure:"type"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
 }
 
 func New() *Cfg {
