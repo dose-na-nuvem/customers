@@ -14,7 +14,6 @@ var startCmd = &cobra.Command{
 		cfg.Logger.Info("banco de dados obtido",
 			zap.String("db.type", cfg.Database.Type),
 			zap.String("db.username", cfg.Database.Username),
-			zap.String("db.password", cfg.Database.Password),
 		)
 		server.Serve(cfg)
 	},
