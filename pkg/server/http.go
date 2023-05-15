@@ -46,9 +46,9 @@ func (h *HTTP) Start(_ context.Context) error {
 	return err
 }
 
-func (h *HTTP) Shutdown(_ context.Context) error {
+func (h *HTTP) Shutdown(ctx context.Context) error {
 	// We received an interrupt signal, shut down.
-	if err := h.srv.Shutdown(context.Background()); err != nil {
+	if err := h.srv.Shutdown(ctx); err != nil {
 		// Error from closing listeners, or context timeout:
 		return err
 	}
