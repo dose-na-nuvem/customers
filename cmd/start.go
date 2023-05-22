@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/dose-na-nuvem/customers/pkg/server"
+	"github.com/dose-na-nuvem/customers/pkg/service"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -15,7 +15,8 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Inicializa o servidor do microsserviço.",
 	Run: func(cmd *cobra.Command, args []string) {
-		h := server.NewHTTP(cfg)
+		ctx := context.Background()
+		svc := service.New(cfg)
 
 		go func() {
 			sigint := make(chan os.Signal, 1)
@@ -23,15 +24,18 @@ var startCmd = &cobra.Command{
 			<-sigint
 
 			cfg.Logger.Info("finalizando o serviço")
-			if err := h.Shutdown(context.Background()); err != nil {
-				cfg.Logger.Error("erro ao finalizar o serviço", zap.Error(err))
+
+			//nolint
+			// TODO: colocar uma deadline para o shutdown
+			if err := svc.Shutdown(ctx); err != nil {
+				cfg.Logger.Error("erro ao finalizar o serviço: %w", zap.Error(err))
 			}
 			cfg.Logger.Info("serviço finalizado com sucesso")
 		}()
 
 		cfg.Logger.Info("inicializando o serviço", zap.String("endpoint", cfg.Server.HTTP.Endpoint))
-		if err := h.Start(context.Background()); err != nil {
-			cfg.Logger.Error("falha ao iniciar o serviço", zap.Error(err))
+		if err := svc.Start(ctx); err != nil {
+			cfg.Logger.Error("erro ao inicializar o serviço: %w", zap.Error(err))
 		}
 	},
 }
