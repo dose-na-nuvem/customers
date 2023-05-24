@@ -26,6 +26,7 @@ var startCmd = &cobra.Command{
 			if err := h.Shutdown(context.Background()); err != nil {
 				cfg.Logger.Error("erro ao finalizar o serviço", zap.Error(err))
 			}
+			cfg.Logger.Info("serviço finalizado com sucesso")
 		}()
 
 		cfg.Logger.Info("inicializando o serviço", zap.String("endpoint", cfg.Server.HTTP.Endpoint))
