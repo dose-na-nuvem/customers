@@ -5,4 +5,4 @@ db:
 
 server:
   http:
-    ReadHeaderTimeout: 1000
+    read_header_timeout: 2s
