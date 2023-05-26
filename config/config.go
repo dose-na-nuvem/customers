@@ -21,7 +21,7 @@ type ServerSettings struct {
 
 type HTTPServerSettings struct {
 	Endpoint          string        `mapstructure:"endpoint"`
-	ReadHeaderTimeout int64 `mapstructure:"readHeaderTimeout"`
+	ReadHeaderTimeout time.Duration `mapstructure:"read_header_timeout"`
 }
 
 func New() *Cfg {
