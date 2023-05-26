@@ -47,7 +47,7 @@ func Execute() {
 	startCmd.Flags().StringVar(&cfg.Server.HTTP.Endpoint, "server.http.endpoint", "localhost:56433",
 		"Endereço onde o serviço vai servir requisições.")
 
-	startCmd.Flags().Int64Var(&cfg.Server.HTTP.ReadHeaderTimeout, "server.http.readHeaderTimeout", 1000, "Tempo máximo de leitura dos headers de uma requisição em Milissegundos")
+	startCmd.Flags().DurationVar(&cfg.Server.HTTP.ReadHeaderTimeout, "server.http.readheadertimeout", 1000, "Tempo máximo de leitura dos headers de uma requisição em milissegundos")
 
 	// tie Viper to flags
 	if err := viper.BindPFlags(startCmd.Flags()); err != nil {
