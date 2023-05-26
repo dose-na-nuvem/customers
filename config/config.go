@@ -17,15 +17,25 @@ type Database struct {
 
 type ServerSettings struct {
 	HTTP HTTPServerSettings `mapstructure:"http"`
+	TLS  *TLSSettings       `mapstructure:"tls"`
 }
 
 type HTTPServerSettings struct {
 	Endpoint string `mapstructure:"endpoint"`
 }
 
+type TLSSettings struct {
+	CertFile    string `mapstructure:"cert_file"`
+	CertKeyFile string `mapstructure:"cert_key_file"`
+	Insecure    bool   `mapstructure:"insecure"`
+}
+
 func New() *Cfg {
 	cfg := &Cfg{
 		Logger: zap.Must(zap.NewDevelopment()),
+		Server: ServerSettings{
+			TLS: &TLSSettings{},
+		},
 	}
 
 	return cfg

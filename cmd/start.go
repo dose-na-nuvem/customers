@@ -34,7 +34,7 @@ var startCmd = &cobra.Command{
 
 		cfg.Logger.Info("inicializando o serviço", zap.String("endpoint", cfg.Server.HTTP.Endpoint))
 		if err := svc.Start(ctx); err != nil {
-			cfg.Logger.Error("erro ao inicializar o serviço: %w", zap.Error(err))
+			cfg.Logger.Error("erro ao inicializar o serviço", zap.Error(err))
 		}
 	},
 }
