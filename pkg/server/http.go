@@ -23,7 +23,7 @@ func NewHTTP(cfg *config.Cfg) *HTTP {
 	srv := &http.Server{
 		Addr:              cfg.Server.HTTP.Endpoint,
 		Handler:           mux,
-		ReadHeaderTimeout: time.Duration(cfg.Server.HTTP.ReadHeaderTimeout) * time.Millisecond,
+		ReadHeaderTimeout: cfg.Server.HTTP.ReadHeaderTimeout,
 	}
 
 	return HTTPWithServer(cfg, srv)
