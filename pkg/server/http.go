@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/dose-na-nuvem/customers/config"
 	"go.uber.org/zap"

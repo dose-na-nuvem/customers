@@ -1,6 +1,9 @@
 package config
 
-import "go.uber.org/zap"
+import (
+	"go.uber.org/zap"
+	"time"
+)
 
 type Cfg struct {
 	Database Database       `mapstructure:"db"`
