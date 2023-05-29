@@ -23,9 +23,14 @@ func New(cfg *config.Cfg) *Customer {
 }
 
 func (c *Customer) Start(ctx context.Context) error {
-	c.srv = server.NewHTTP(c.cfg)
+	var err error
 
-	if err := c.srv.Start(ctx); err != nil {
+	c.srv, err = server.NewHTTP(c.cfg)
+	if err != nil {
+		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
+	}
+
+	if err = c.srv.Start(ctx); err != nil {
 		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
 	}
 

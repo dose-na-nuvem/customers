@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -9,14 +10,19 @@ import (
 	"go.uber.org/zap"
 )
 
+var errNoTLSConfig = errors.New("servidor sem configuração de TLS")
+
 type HTTP struct {
 	logger *zap.Logger
 
 	shutdownCh chan struct{}
 	srv        *http.Server
+
+	certFile    string
+	certKeyFile string
 }
 
-func NewHTTP(cfg *config.Cfg) *HTTP {
+func NewHTTP(cfg *config.Cfg) (*HTTP, error) {
 	mux := http.NewServeMux()
 	mux.Handle("/", NewCustomerHandler(cfg.Logger))
 
@@ -29,16 +35,37 @@ func NewHTTP(cfg *config.Cfg) *HTTP {
 	return HTTPWithServer(cfg, srv)
 }
 
-func HTTPWithServer(cfg *config.Cfg, srv *http.Server) *HTTP {
-	return &HTTP{
-		logger:     cfg.Logger,
-		shutdownCh: make(chan struct{}),
-		srv:        srv,
+func HTTPWithServer(cfg *config.Cfg, srv *http.Server) (*HTTP, error) {
+	if cfg.Server.TLS.CertFile != "" && cfg.Server.TLS.CertKeyFile != "" {
+		cfg.Logger.Info("Servidor configurado com opções TLS",
+			zap.String("cert_file", cfg.Server.TLS.CertFile),
+			zap.String("cert_key_file", cfg.Server.TLS.CertKeyFile),
+		)
+	} else {
+		if cfg.Server.TLS.Insecure {
+			cfg.Logger.Info("Servidor sem configurações de TLS! Este servidor está inseguro!")
+		} else {
+			return nil, errNoTLSConfig
+		}
 	}
+
+	return &HTTP{
+		logger:      cfg.Logger,
+		shutdownCh:  make(chan struct{}),
+		srv:         srv,
+		certFile:    cfg.Server.TLS.CertFile,
+		certKeyFile: cfg.Server.TLS.CertKeyFile,
+	}, nil
 }
 
 func (h *HTTP) Start(_ context.Context) error {
-	err := h.srv.ListenAndServe()
+	var err error
+	if h.certFile != "" && h.certKeyFile != "" {
+		err = h.srv.ListenAndServeTLS(h.certFile, h.certKeyFile)
+	} else {
+		err = h.srv.ListenAndServe()
+	}
+
 	if err == http.ErrServerClosed {
 		return nil
 	}
