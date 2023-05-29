@@ -2,3 +2,8 @@ db:
   type: sqlite
   username: customers
   password: secret
+
+tls:
+  # cert_file: tmp/cert.pem
+  # cert_key_file: tmp/cert-key.pem
+  insecure: false
