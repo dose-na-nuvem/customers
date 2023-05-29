@@ -25,7 +25,6 @@ var startCmd = &cobra.Command{
 
 			cfg.Logger.Info("finalizando o serviço")
 
-			//nolint
 			// TODO: colocar uma deadline para o shutdown
 			if err := svc.Shutdown(ctx); err != nil {
 				cfg.Logger.Error("erro ao finalizar o serviço: %w", zap.Error(err))

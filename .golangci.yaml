@@ -65,21 +65,6 @@ linters:
     - unused
     - whitespace
 
-  presets:
-    - bugs
-    - comment
-    - complexity
-    - error
-    - format
-    - import
-    - metalinter
-    - module
-    - performance
-    - sql
-    - style
-    - test
-    - unused
-
 issues:
   exclude-use-default: true
   exclude-case-sensitive: false
