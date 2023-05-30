@@ -49,7 +49,8 @@ func Execute() {
 
 	startCmd.Flags().StringVar(&cfg.Server.TLS.CertFile, "server.tls.certfile", "", "caminho do certificado.")
 
-	startCmd.Flags().StringVar(&cfg.Server.TLS.CertKeyFile, "server.tls.certkeyfile", "", "caminho da chave privada do certificado.")
+	startCmd.Flags().StringVar(&cfg.Server.TLS.CertKeyFile, "server.tls.certkeyfile", "",
+		"caminho da chave privada do certificado.")
 
 	startCmd.Flags().BoolVar(&cfg.Server.TLS.Insecure, "server.tls.insecure", false, "Força o modo inseguro.")
 
