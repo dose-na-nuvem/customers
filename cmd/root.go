@@ -13,7 +13,7 @@ import (
 var (
 	configFile     string
 	cfg            = config.New()
-	defaultTimeout = 1000
+	defaultTimeout = 2000
 )
 
 // rootCmd represents the base command when called without any subcommands.
