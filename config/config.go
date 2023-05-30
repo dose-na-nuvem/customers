@@ -35,6 +35,12 @@ type TLSSettings struct {
 	Insecure    bool   `mapstructure:"insecure"`
 }
 
+type TLSSettings struct {
+	CertFile    string `mapstructure:"cert_file"`
+	CertKeyFile string `mapstructure:"cert_key_file"`
+	Insecure    bool   `mapstructure:"insecure"`
+}
+
 func New() *Cfg {
 	cfg := &Cfg{
 		Logger: zap.Must(zap.NewDevelopment()),
