@@ -1,4 +1,4 @@
-package server //nolint
+package server
 
 import (
 	"testing"
