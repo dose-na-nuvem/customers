@@ -12,6 +12,7 @@ import (
 var (
 	configFile string
 	cfg        = config.New()
+	defaultTimeout = 1000
 )
 
 // rootCmd represents the base command when called without any subcommands.
@@ -47,7 +48,8 @@ func Execute() {
 	startCmd.Flags().StringVar(&cfg.Server.HTTP.Endpoint, "server.http.endpoint", "localhost:56433",
 		"Endereço onde o serviço vai servir requisições.")
 
-	startCmd.Flags().DurationVar(&cfg.Server.HTTP.ReadHeaderTimeout, "server.http.readheadertimeout", 1000, "Tempo máximo de leitura dos headers de uma requisição em milissegundos")
+	startCmd.Flags().DurationVar(&cfg.Server.HTTP.ReadHeaderTimeout, "server.http.readheadertimeout", time.Duration(defaultTimeout),
+		"Tempo máximo de leitura dos headers de uma requisição em milissegundos")
 
 	// tie Viper to flags
 	if err := viper.BindPFlags(startCmd.Flags()); err != nil {
