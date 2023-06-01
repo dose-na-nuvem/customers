@@ -2,3 +2,7 @@ db:
   type: sqlite
   username: customers
   password: secret
+
+server:
+  http:
+    read_header_timeout: 2s
