@@ -21,9 +21,9 @@ type HTTP struct {
 	certKeyFile string
 }
 
-func NewHTTP(cfg *config.Cfg) (*HTTP, error) {
+func NewHTTP(cfg *config.Cfg, customerHandler http.Handler) (*HTTP, error) {
 	mux := http.NewServeMux()
-	mux.Handle("/", NewCustomerHandler(cfg.Logger))
+	mux.Handle("/", customerHandler)
 
 	srv := &http.Server{
 		Addr:              cfg.Server.HTTP.Endpoint,
