@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/dose-na-nuvem/customers/config"
 	"go.uber.org/zap"
@@ -23,7 +22,7 @@ func NewHTTP(cfg *config.Cfg) *HTTP {
 	srv := &http.Server{
 		Addr:              cfg.Server.HTTP.Endpoint,
 		Handler:           mux,
-		ReadHeaderTimeout: time.Second,
+		ReadHeaderTimeout: cfg.Server.HTTP.ReadHeaderTimeout,
 	}
 
 	return HTTPWithServer(cfg, srv)

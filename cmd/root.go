@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"time"
 
 	"github.com/dose-na-nuvem/customers/config"
 	"github.com/spf13/cobra"
@@ -46,6 +47,9 @@ func Execute() {
 
 	startCmd.Flags().StringVar(&cfg.Server.HTTP.Endpoint, "server.http.endpoint", "localhost:56433",
 		"Endereço onde o serviço vai servir requisições.")
+
+	startCmd.Flags().DurationVar(&cfg.Server.HTTP.ReadHeaderTimeout, "server.http.read_header_timeout", 2*time.Second,
+		"Tempo limite para leitura dos cabeçalhos HTTP")
 
 	// tie Viper to flags
 	if err := viper.BindPFlags(startCmd.Flags()); err != nil {

@@ -1,6 +1,10 @@
 package config
 
-import "go.uber.org/zap"
+import (
+	"time"
+
+	"go.uber.org/zap"
+)
 
 type Cfg struct {
 	Database Database       `mapstructure:"db"`
@@ -20,7 +24,8 @@ type ServerSettings struct {
 }
 
 type HTTPServerSettings struct {
-	Endpoint string `mapstructure:"endpoint"`
+	Endpoint          string        `mapstructure:"endpoint"`
+	ReadHeaderTimeout time.Duration `mapstructure:"read_header_timeout"`
 }
 
 func New() *Cfg {
