@@ -15,7 +15,7 @@ A geração de certificados auto-assinados pode ser feita seguindo o artigo http
 
 Como o artigo está em inglês e queremos fornecer um material que os brasileiros podem usar, o resumo para as instruções é o seguinte:
 
-- crie uma pasta /tmp
+- crie uma pasta local `tmp` e acesse-a
 - instale a ferramenta open-source [cfssl](https://github.com/cloudflare/cfssl) que nos permitirá a criação dos certificados
 - crie um arquivo `ca-csr.json` necessário para a autoridade certificadora (CA). Use como exemplo o trecho abaixo
 ```
