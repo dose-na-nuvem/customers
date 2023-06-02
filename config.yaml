@@ -7,3 +7,7 @@ tls:
   # cert_file: tmp/cert.pem
   # cert_key_file: tmp/cert-key.pem
   insecure: false
+
+server:
+  http:
+    read_header_timeout: 2s
