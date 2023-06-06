@@ -49,11 +49,11 @@ func Execute() {
 	startCmd.Flags().StringVar(&cfg.Server.HTTP.Endpoint, "server.http.endpoint", "localhost:56433",
 		"Endereço onde o serviço vai servir requisições.")
 
-  startCmd.Flags().DurationVar(&cfg.Server.HTTP.ReadHeaderTimeout, "server.http.readheadertimeout",
+	startCmd.Flags().DurationVar(&cfg.Server.HTTP.ReadHeaderTimeout, "server.http.readheadertimeout",
 		time.Duration(defaultTimeout),
 		"Tempo máximo de leitura dos headers de uma requisição em milissegundos")
 
-  startCmd.Flags().StringVar(&cfg.Server.TLS.CertFile, "server.tls.certfile", "", "caminho do certificado.")
+	startCmd.Flags().StringVar(&cfg.Server.TLS.CertFile, "server.tls.certfile", "", "caminho do certificado.")
 
 	startCmd.Flags().StringVar(&cfg.Server.TLS.CertKeyFile, "server.tls.certkeyfile", "",
 		"caminho da chave privada do certificado.")
