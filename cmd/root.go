@@ -53,6 +53,13 @@ func Execute() {
 		time.Duration(defaultTimeout),
 		"Tempo máximo de leitura dos headers de uma requisição em milissegundos")
 
+	startCmd.Flags().StringVar(&cfg.Server.TLS.CertFile, "server.tls.certfile", "", "caminho do certificado.")
+
+	startCmd.Flags().StringVar(&cfg.Server.TLS.CertKeyFile, "server.tls.certkeyfile", "",
+		"caminho da chave privada do certificado.")
+
+	startCmd.Flags().BoolVar(&cfg.Server.TLS.Insecure, "server.tls.insecure", false, "Força o modo inseguro.")
+
 	// tie Viper to flags
 	if err := viper.BindPFlags(startCmd.Flags()); err != nil {
 		cfg.Logger.Error("falha ao ligar as flags", zap.Error(err))
