@@ -36,9 +36,13 @@ func (h *CustomerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CustomerHandler) createCustomer(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.logger.Warn("erro ao varrer dados do post")
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	name := r.PostForm.Get("name")
-	_, err := h.store.CreateCustomer(name)
+	_, err = h.store.CreateCustomer(name)
 	if err != nil {
 		h.logger.Warn("falha ao criar um customer", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
