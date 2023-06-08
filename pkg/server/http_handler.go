@@ -36,6 +36,7 @@ func (h *CustomerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CustomerHandler) createCustomer(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
 	name := r.PostForm.Get("name")
 	_, err := h.store.CreateCustomer(name)
 	if err != nil {

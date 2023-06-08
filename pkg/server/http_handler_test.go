@@ -22,7 +22,7 @@ func TestNewCustomer(t *testing.T) {
 
 		// TODO: nosso código não está funcionando de verdade:
 		// arrumar o código e ativar a próxima linha
-		// assert.Equal(t, "John Doe", name)
+		assert.Equal(t, "John Doe", name)
 
 		return nil, nil
 	}}
