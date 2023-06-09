@@ -30,8 +30,7 @@ func (h *CustomerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		h.createCustomer(w, r)
 	default:
-		// TODO: isso esta dando nil pointer em um teste
-		// w.WriteHeader(http.StatusNotImplemented)
+		w.WriteHeader(http.StatusNotImplemented)
 	}
 }
 

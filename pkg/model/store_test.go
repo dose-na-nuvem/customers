@@ -21,7 +21,8 @@ func TestCreateCustomer(t *testing.T) {
 		require.NoError(t, err)
 	}()
 
-	db.AutoMigrate(&Customer{})
+	err = db.AutoMigrate(&Customer{})
+	assert.NoError(t, err)
 
 	st := NewStore(db)
 
