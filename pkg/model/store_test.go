@@ -1,8 +1,8 @@
 package model
 
 import (
-	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -12,16 +12,17 @@ import (
 
 func TestCreateCustomer(t *testing.T) {
 	// prepare
-	db, err := gorm.Open(sqlite.Open("TestCreateCustomer.db"), &gorm.Config{})
+	time.Local, _ = time.LoadLocation("UTC")
+	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{
+		SkipDefaultTransaction: true, //agiliza os testes
+		NowFunc:                time.Now().Local,
+	})
 	if err != nil {
 		require.NoError(t, err)
 	}
-	defer func() {
-		err := os.Remove("TestCreateCustomer.db")
-		require.NoError(t, err)
-	}()
 
-	db.AutoMigrate(&Customer{})
+	err = db.AutoMigrate(&Customer{})
+	assert.NoError(t, err)
 
 	st := NewStore(db)
 

@@ -30,15 +30,18 @@ func (h *CustomerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		h.createCustomer(w, r)
 	default:
-		// TODO: isso esta dando nil pointer em um teste
-		// w.WriteHeader(http.StatusNotImplemented)
+		w.WriteHeader(http.StatusNotImplemented)
 	}
 }
 
 func (h *CustomerHandler) createCustomer(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.logger.Warn("erro ao varrer dados do post")
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	name := r.PostForm.Get("name")
-	_, err := h.store.CreateCustomer(name)
+	_, err = h.store.CreateCustomer(name)
 	if err != nil {
 		h.logger.Warn("falha ao criar um customer", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
