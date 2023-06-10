@@ -87,7 +87,7 @@ type mockStore struct {
 
 func (m *mockStore) CreateCustomer(name string) (*model.Customer, error) {
 	if m.createCustomerFunc != nil {
-		_, _ = m.createCustomerFunc(name)
+		return m.createCustomerFunc(name)
 	}
 
 	return nil, nil

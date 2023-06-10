@@ -12,9 +12,12 @@ import (
 
 func TestCreateCustomer(t *testing.T) {
 	// prepare
-	time.Local, _ = time.LoadLocation("UTC")
+	var err error
+	time.Local, err = time.LoadLocation("UTC")
+	require.NoError(t, err)
+
 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{
-		SkipDefaultTransaction: true, //agiliza os testes
+		SkipDefaultTransaction: true, // agiliza os testes
 		NowFunc:                time.Now().Local,
 	})
 	if err != nil {
