@@ -1,6 +1,5 @@
 root = "."
 testdata_dir = "testdata"
-<<<<<<< HEAD
 tmp_dir = "_build"
 
 [build]
@@ -9,16 +8,6 @@ tmp_dir = "_build"
   cmd = "go build -o ./_build/customers ."
   delay = 0
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "_build"]
-=======
-tmp_dir = "tmp"
-
-[build]
-  args_bin = []
-  bin = "./tmp/customers start --config config.yaml "
-  cmd = "go build -o ./tmp/customers ."
-  delay = 0
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
->>>>>>> air configuration
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
@@ -28,11 +17,7 @@ tmp_dir = "tmp"
   include_ext = ["go", "tpl", "tmpl", "html"]
   include_file = []
   kill_delay = "0s"
-<<<<<<< HEAD
   log = "_build/errors.log"
-=======
-  log = "build-errors.log"
->>>>>>> air configuration
   poll = false
   poll_interval = 0
   rerun = false
