@@ -25,15 +25,6 @@ func New(cfg *config.Cfg) *Customer {
 func (c *Customer) Start(ctx context.Context) error {
 	var err error
 
-	c.srv, err = server.NewHTTP(c.cfg)
-	if err != nil {
-		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
-	}
-
-	if err = c.srv.Start(ctx); err != nil {
-		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
-	}
-
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		return fmt.Errorf("falha ao conectar ao banco de dados: %w", err)
@@ -42,6 +33,19 @@ func (c *Customer) Start(ctx context.Context) error {
 	// Migrate the schema
 	if err := db.AutoMigrate(&model.Customer{}); err != nil {
 		return fmt.Errorf("falha ao migrar o esquema do banco de dados: %w", err)
+	}
+
+	store := model.NewStore(db)
+
+	ch := server.NewCustomerHandler(c.cfg.Logger, store)
+
+	c.srv, err = server.NewHTTP(c.cfg, ch)
+	if err != nil {
+		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
+	}
+
+	if err = c.srv.Start(ctx); err != nil {
+		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
 	}
 
 	return nil

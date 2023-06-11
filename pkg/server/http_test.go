@@ -20,7 +20,7 @@ func TestNewHTTP(t *testing.T) {
 	}
 
 	// test
-	srv, err := NewHTTP(cfg)
+	srv, err := NewHTTP(cfg, NewCustomerHandler(cfg.Logger, nil))
 
 	// verify
 	assert.NoError(t, err)
