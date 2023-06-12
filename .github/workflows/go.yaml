@@ -43,3 +43,4 @@ jobs:
         skip-cache: true
         skip-build-cache: true
         skip-pkg-cache: true
+      run: make lint
