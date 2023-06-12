@@ -36,11 +36,8 @@ jobs:
       run: go test -v ./...
 
     - name: Lint
-      uses: golangci/golangci-lint-action@v3
-      with:
-        version: v1.53.2
-        only-new-issues: true
-        skip-cache: true
-        skip-build-cache: true
-        skip-pkg-cache: true
-      run: make lint
+      run: |
+        # binary will be $(go env GOPATH)/bin/golangci-lint
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.2
+        # curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.53.2
+        make lint
