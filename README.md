@@ -74,6 +74,15 @@ tls:
 2 - via linha de comando
 > go run . start --config config.yaml --server.tls.certfile tmp/cert.pem --server.tls.certkeyfile tmp/cert-key.pem
 
+# Live reload
+
+Para facilitar o desenvolvimento, automatizando a execução do seu app a cada mudança de código, você pode usar o software opensource [Air](https://github.com/cosmtrek/air).
+
+Para instalar o Air:
+> go install github.com/cosmtrek/air@latest
+
+Revise o comando de inicialização do app na seção [build] do `.air.toml` e então simplesmente execute `air`.
+
 # Project's Toolkit
 
 - https://golangci-lint.run
