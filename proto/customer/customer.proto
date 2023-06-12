@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "github.com/dose-na-nuvem/customers/protogen/customer";
+
+package customer;
+
+service Customer {
+    rpc Create (CreateRequest) returns (Empty) {}
+}
+
+message CreateRequest {
+    string name = 1;
+}
+
+message Empty {}

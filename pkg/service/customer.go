@@ -48,6 +48,8 @@ func (c *Customer) Start(ctx context.Context) error {
 		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
 	}
 
+	// TODO: iniciar o servidor gRPC
+
 	return nil
 }
 
@@ -55,6 +57,8 @@ func (c *Customer) Shutdown(ctx context.Context) error {
 	if err := c.srv.Shutdown(ctx); err != nil {
 		return fmt.Errorf("erro ao finalizar o serviço: %w", err)
 	}
+
+	// TODO: finalizar o servidor gRPC
 
 	return nil
 }

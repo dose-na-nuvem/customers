@@ -22,3 +22,7 @@ air:
 .PHONY: install-tools
 install-tools:
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.2
+
+.PHONY: protoc
+protoc:
+	@protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/customer/customer.proto 
