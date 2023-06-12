@@ -1,9 +1,22 @@
 # customers
 Cadastro dos nossos clientes
 
-# How to run lint locally
+# Como executar o linter localmente
 
 > golangci-lint run ./...
+
+# Arquivos locais
+
+Para o desenvolvimento de nossa aplicação, precisamos de alguns arquivos locais, como o arquivo de configuração e os certificados TLS. As ferramentas deste projeto partem do pressuposto que estes arquivos estão no diretório `local`, organizados da seguinte forma:
+
+```
+local
+├── certs
+│   ├── ca.pem
+│   ├── cert-key.pem
+│   └── cert.pem
+└── config.yaml
+```
 
 # Servidor em modo seguro com TLS
 
@@ -67,9 +80,8 @@ Use esses certificados para execução do servidor
 1 - via arquivo de configuração. Acrescente o seguinte trecho no arquivo `config.yaml`.
 ```
 tls:
-  cert_file: tmp/cert.pem
-  cert_key_file: tmp/cert-key.pem
-  insecure: false
+  cert_file: local/certs/cert.pem
+  cert_key_file: local/certs/cert-key.pem
 ```
 2 - via linha de comando
 > go run . start --config config.yaml --server.tls.certfile tmp/cert.pem --server.tls.certkeyfile tmp/cert-key.pem
