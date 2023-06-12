@@ -4,8 +4,8 @@ tmp_dir = "_build"
 
 [build]
   args_bin = []
-  bin = "./_build/customers start --config config.yaml "
-  cmd = "go build -o ./_build/customers ."
+  bin = "./_build/customers start --config local/config.yaml"
+  cmd = "make build"
   delay = 0
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "_build"]
   exclude_file = []
