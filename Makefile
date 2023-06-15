@@ -5,7 +5,7 @@ all: lint test build
 
 .PHONY: lint
 lint:
-	@golangci-lint run ./...
+	@golangci-lint --timeout 120s run ./...
 
 .PHONY: test
 test:
