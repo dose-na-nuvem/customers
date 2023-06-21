@@ -73,59 +73,6 @@ func TestCreateCustomer(t *testing.T) {
 	assert.True(t, called)
 }
 
-// desabilitando em prol de aproveita outras possibilidades construtivas
-func aTestGRPCServerTLS(t *testing.T) {
-	// prepare
-	core, _ := observer.New(zap.InfoLevel)
-	logger := zap.New(core)
-
-	testCases := []struct {
-		desc        string
-		cfg         *config.Cfg
-		shouldErr   bool
-		certFile    string
-		certKeyFile string
-	}{
-		{
-			desc:        "has certs, insecure is set to false",
-			cfg:         config.New(),
-			shouldErr:   false,
-			certFile:    "../../local/certs/cert.pem",
-			certKeyFile: "../../local/certs/cert-key.pem",
-		},
-		{
-			desc:        "has broken certs",
-			cfg:         config.New(),
-			shouldErr:   true,
-			certFile:    "../../local/certs/cert.csr",
-			certKeyFile: "../../local/certs/ca.csr",
-		},
-	}
-
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-			// prepare
-			cfg := tC.cfg
-			cfg.Logger = logger
-			if tC.certFile != "" {
-				cfg.Server.TLS.CertFile = tC.certFile
-				cfg.Server.TLS.CertKeyFile = tC.certKeyFile
-			}
-
-			// test
-			computed, err := buildServerOptions(tC.cfg)
-
-			// assert
-			if !tC.shouldErr {
-				require.NoError(t, err)
-				assert.NotEmpty(t, computed, "esperava-se configurações preenchidas")
-			} else {
-				assert.Empty(t, computed, "esperava-se configurações preenchidas")
-			}
-		})
-	}
-}
-
 func TestGRPCServerInsecure(t *testing.T) {
 	// prepare
 	core, _ := observer.New(zap.InfoLevel)
