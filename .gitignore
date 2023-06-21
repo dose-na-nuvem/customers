@@ -23,3 +23,6 @@ go.work
 # sqlite db
 test.db
 _build
+
+# ignora gerados por proto
+*.pb.go

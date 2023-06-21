@@ -22,7 +22,7 @@ func TestNewCustomer(t *testing.T) {
 	st := &mockStore{createCustomerFunc: func(name string) (*model.Customer, error) {
 		called = true
 
-		assert.Equal(t, "John Doe", name)
+		assert.Equal(t, "Fulano de Tal", name)
 
 		return nil, nil
 	}}
@@ -38,7 +38,7 @@ func TestNewCustomer(t *testing.T) {
 	// test
 	ctx := context.Background()
 	form := make(url.Values)
-	form.Add("name", "John Doe")
+	form.Add("name", "Fulano de Tal")
 	formReader := strings.NewReader(form.Encode())
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, ts.URL, formReader)
 	require.NoError(t, err)
@@ -79,16 +79,4 @@ type ResponseWriterMock struct {
 
 func (r *ResponseWriterMock) Write([]byte) (int, error) {
 	return 0, errors.New("boo")
-}
-
-type mockStore struct {
-	createCustomerFunc func(name string) (*model.Customer, error)
-}
-
-func (m *mockStore) CreateCustomer(name string) (*model.Customer, error) {
-	if m.createCustomerFunc != nil {
-		return m.createCustomerFunc(name)
-	}
-
-	return nil, nil
 }
