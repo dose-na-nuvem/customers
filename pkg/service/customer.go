@@ -12,8 +12,9 @@ import (
 )
 
 type Customer struct {
-	cfg *config.Cfg
-	srv *server.HTTP
+	cfg  *config.Cfg
+	srv  *server.HTTP
+	grpc *server.GRPC
 }
 
 func New(cfg *config.Cfg) *Customer {
@@ -39,6 +40,15 @@ func (c *Customer) Start(ctx context.Context) error {
 
 	ch := server.NewCustomerHandler(c.cfg.Logger, store)
 
+	// TODO: iniciar o servidor gRPC
+	c.grpc, err = server.NewGRPC(c.cfg)
+	if err != nil {
+		return fmt.Errorf("falha ao iniciar o servidor GRPC: %w", err)
+	}
+	if err = c.grpc.Start(ctx); err != nil {
+		return fmt.Errorf("falha ao inicia o servidor GRPC: %w", err)
+	}
+
 	c.srv, err = server.NewHTTP(c.cfg, ch)
 	if err != nil {
 		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
@@ -47,8 +57,6 @@ func (c *Customer) Start(ctx context.Context) error {
 	if err = c.srv.Start(ctx); err != nil {
 		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
 	}
-
-	// TODO: iniciar o servidor gRPC
 
 	return nil
 }
@@ -59,6 +67,9 @@ func (c *Customer) Shutdown(ctx context.Context) error {
 	}
 
 	// TODO: finalizar o servidor gRPC
+	if err := c.grpc.Shutdown(ctx); err != nil {
+		return fmt.Errorf("erro ao finalizar o serviço: %w", err)
+	}
 
 	return nil
 }
