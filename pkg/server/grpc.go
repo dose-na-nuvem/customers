@@ -34,14 +34,10 @@ func (g *GRPC) Create(_ context.Context, req *customer.CreateRequest) (*customer
 func NewGRPC(cfg *config.Cfg, store CustomerStore) (*GRPC, error) {
 	lis, err := net.Listen("tcp", cfg.Server.GRPC.Endpoint)
 	if err != nil {
-		return &GRPC{}, err
-	}
-
-	opts, err := buildServerOptions(cfg)
-	if err != nil {
 		return nil, err
 	}
 
+	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
 
 	grpc := &GRPC{
@@ -84,8 +80,7 @@ func buildServerOptions(cfg *config.Cfg) ([]grpc.ServerOption, error) {
 
 func (g *GRPC) Start(_ context.Context) error {
 	g.logger.Info("iniciando servidor gRPC")
-	err := g.grpc.Serve(g.listener)
-	return err
+	return g.grpc.Serve(g.listener)
 }
 
 func (g *GRPC) Shutdown(_ context.Context) error {
