@@ -33,7 +33,7 @@ func (g *GRPC) Create(_ context.Context, req *customer.CreateRequest) (*customer
 func NewGRPC(cfg *config.Cfg, store CustomerStore) (*GRPC, error) {
 	lis, err := net.Listen("tcp", cfg.Server.GRPC.Endpoint)
 	if err != nil {
-		return &GRPC{}, err
+		return nil, err
 	}
 
 	var opts []grpc.ServerOption
