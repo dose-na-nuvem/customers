@@ -40,8 +40,7 @@ func (c *Customer) Start(ctx context.Context) error {
 
 	ch := server.NewCustomerHandler(c.cfg.Logger, store)
 
-	// TODO: iniciar o servidor gRPC
-	c.grpc, err = server.NewGRPC(c.cfg)
+	c.grpc, err = server.NewGRPC(c.cfg, store)
 	if err != nil {
 		return fmt.Errorf("falha ao iniciar o servidor GRPC: %w", err)
 	}
