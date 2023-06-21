@@ -20,13 +20,18 @@ type Database struct {
 }
 
 type ServerSettings struct {
-	HTTP HTTPServerSettings `mapstructure:"http"`
-	TLS  *TLSSettings       `mapstructure:"tls"`
+	HTTP HTTPServerSettings  `mapstructure:"http"`
+	GRPC *GRPCServerSettings `mapstructure:"grpc"`
+	TLS  *TLSSettings        `mapstructure:"tls"`
 }
 
 type HTTPServerSettings struct {
 	Endpoint          string        `mapstructure:"endpoint"`
 	ReadHeaderTimeout time.Duration `mapstructure:"read_header_timeout"`
+}
+
+type GRPCServerSettings struct {
+	Endpoint string `mapstructure:"endpoint"`
 }
 
 type TLSSettings struct {
