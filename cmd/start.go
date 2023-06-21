@@ -32,7 +32,10 @@ var startCmd = &cobra.Command{
 			cfg.Logger.Info("serviço finalizado com sucesso")
 		}()
 
-		cfg.Logger.Info("inicializando o serviço", zap.String("endpoint", cfg.Server.HTTP.Endpoint))
+		// TODO: ajustar as msgs conforme o servidor que possa ter dado problema
+		cfg.Logger.Info("inicializando o serviço",
+			zap.String("http", cfg.Server.HTTP.Endpoint),
+			zap.String("grpc", cfg.Server.GRPC.Endpoint))
 		if err := svc.Start(ctx); err != nil {
 			cfg.Logger.Error("erro ao inicializar o serviço", zap.Error(err))
 		}
