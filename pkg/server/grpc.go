@@ -64,7 +64,7 @@ func buildServerOptions(cfg *config.Cfg) ([]grpc.ServerOption, error) {
 		creds, err := credentials.NewServerTLSFromFile(cfg.Server.TLS.CertFile,
 			cfg.Server.TLS.CertKeyFile)
 		if err != nil {
-			return nil, errNoTLSConfig
+			return nil, fmt.Errorf("%s, %w", errNoTLSConfig, err)
 		}
 
 		opts = append(opts, grpc.Creds(creds))
