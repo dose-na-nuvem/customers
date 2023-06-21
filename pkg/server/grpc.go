@@ -53,7 +53,7 @@ func NewGRPC(cfg *config.Cfg, store CustomerStore) (*GRPC, error) {
 
 func (g *GRPC) Start(_ context.Context) error {
 	g.logger.Info("iniciando servidor gRPC")
-	err := g.grpc.Serve(g.listener)
+	return g.grpc.Serve(g.listener)
 	return err
 }
 
