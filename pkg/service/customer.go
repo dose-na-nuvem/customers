@@ -71,7 +71,7 @@ func (c *Customer) Start(ctx context.Context) error {
 
 	go func() {
 		if httpErr := c.srv.Start(ctx); httpErr != nil && !errors.Is(httpErr, http.ErrServerClosed) {
-			c.cfg.Logger.Error("falha ao iniciar o servidor HTTP: %w", zap.Error(httpErr))
+			c.cfg.Logger.Error("falha ao iniciar o servidor HTTP", zap.Error(httpErr))
 			c.asyncErrorChannel <- httpErr
 		}
 	}()
