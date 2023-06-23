@@ -73,7 +73,6 @@ func TestCreateCustomer(t *testing.T) {
 	assert.True(t, called)
 }
 
-// desabilitando em prol de aproveita outras possibilidades construtivas
 func TestGRPCServerTLS(t *testing.T) {
 	// prepare
 	core, _ := observer.New(zap.InfoLevel)
