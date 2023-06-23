@@ -74,7 +74,7 @@ func TestCreateCustomer(t *testing.T) {
 }
 
 // desabilitando em prol de aproveita outras possibilidades construtivas
-func aTestGRPCServerTLS(t *testing.T) {
+func TestGRPCServerTLS(t *testing.T) {
 	// prepare
 	core, _ := observer.New(zap.InfoLevel)
 	logger := zap.New(core)
@@ -90,15 +90,15 @@ func aTestGRPCServerTLS(t *testing.T) {
 			desc:        "has certs, insecure is set to false",
 			cfg:         config.New(),
 			shouldErr:   false,
-			certFile:    "../../local/certs/cert.pem",
-			certKeyFile: "../../local/certs/cert-key.pem",
+			certFile:    "fixtures/certs/cert.pem",
+			certKeyFile: "fixtures/certs/cert-key.pem",
 		},
 		{
 			desc:        "has broken certs",
 			cfg:         config.New(),
 			shouldErr:   true,
-			certFile:    "../../local/certs/cert.csr",
-			certKeyFile: "../../local/certs/ca.csr",
+			certFile:    "fixtures/certs/invalid.pem",
+			certKeyFile: "fixtures/certs/invalid-key.pem",
 		},
 	}
 
