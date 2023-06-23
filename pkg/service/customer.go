@@ -58,7 +58,7 @@ func (c *Customer) Start(ctx context.Context) error {
 		return fmt.Errorf("falha ao iniciar o servidor GRPC: %w", err)
 	}
 	go func() {
-		if grpcErr := c.grpc.Start(ctx); grpcErr != nil && !errors.Is(grpcErr, grpc.ErrServerStopped) {
+		if grpcErr := c.grpc.Start(ctx); !errors.Is(grpcErr, grpc.ErrServerStopped) {
 			c.cfg.Logger.Error("falha ao iniciar o servidor GRPC", zap.Error(grpcErr))
 			c.asyncErrorChannel <- grpcErr
 		}
@@ -70,7 +70,7 @@ func (c *Customer) Start(ctx context.Context) error {
 	}
 
 	go func() {
-		if httpErr := c.srv.Start(ctx); httpErr != nil && !errors.Is(httpErr, http.ErrServerClosed) {
+		if httpErr := c.srv.Start(ctx); !errors.Is(httpErr, http.ErrServerClosed) {
 			c.cfg.Logger.Error("falha ao iniciar o servidor HTTP", zap.Error(httpErr))
 			c.asyncErrorChannel <- httpErr
 		}
