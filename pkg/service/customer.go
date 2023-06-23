@@ -59,7 +59,7 @@ func (c *Customer) Start(ctx context.Context) error {
 	}
 	go func() {
 		if grpcErr := c.grpc.Start(ctx); grpcErr != nil && !errors.Is(grpcErr, grpc.ErrServerStopped) {
-			c.cfg.Logger.Error("falha ao iniciar o servidor GRPC: %w", zap.Error(grpcErr))
+			c.cfg.Logger.Error("falha ao iniciar o servidor GRPC", zap.Error(grpcErr))
 			c.asyncErrorChannel <- grpcErr
 		}
 	}()
