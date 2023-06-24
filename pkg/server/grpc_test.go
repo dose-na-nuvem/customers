@@ -119,7 +119,8 @@ func TestGRPCServerTLS(t *testing.T) {
 				require.NoError(t, err)
 				assert.NotEmpty(t, computed, "esperava-se configurações preenchidas")
 			} else {
-				assert.Empty(t, computed, "esperava-se configurações preenchidas")
+				assert.Empty(t, computed, "não se espera configuração alguma")
+				assert.Error(t, err)
 			}
 		})
 	}
@@ -181,7 +182,8 @@ func TestGRPCServerInsecure(t *testing.T) {
 					assert.NotEmpty(t, computed, "esperava-se configurações preenchidas")
 				}
 			} else {
-				assert.Empty(t, computed, "esperava-se configurações preenchidas")
+				assert.Empty(t, computed, "não se espera configuração alguma")
+				assert.Error(t, err)
 			}
 		})
 	}
