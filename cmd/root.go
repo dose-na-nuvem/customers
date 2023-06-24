@@ -47,7 +47,7 @@ func Execute() {
 		"Senha do usuário do banco de dados a ser utilizado.")
 
 	startCmd.Flags().StringVar(&cfg.Server.HTTP.Endpoint, "server.http.endpoint", "localhost:56433",
-		"Endereço onde o serviço vai servir requisições.")
+		"Endereço HTTP onde o serviço vai servir requisições.")
 
 	startCmd.Flags().DurationVar(&cfg.Server.HTTP.ReadHeaderTimeout, "server.http.readheadertimeout",
 		time.Duration(defaultTimeout),
@@ -59,6 +59,9 @@ func Execute() {
 		"caminho da chave privada do certificado.")
 
 	startCmd.Flags().BoolVar(&cfg.Server.TLS.Insecure, "server.tls.insecure", false, "Força o modo inseguro.")
+
+	startCmd.Flags().StringVar(&cfg.Server.GRPC.Endpoint, "server.grpc.endpoint", "localhost:56533",
+		"Endereço gRPC onde o serviço vai servir requisições.")
 
 	// tie Viper to flags
 	if err := viper.BindPFlags(startCmd.Flags()); err != nil {

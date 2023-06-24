@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/dose-na-nuvem/customers/config"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 )
 
@@ -23,7 +24,7 @@ type HTTP struct {
 
 func NewHTTP(cfg *config.Cfg, customerHandler http.Handler) (*HTTP, error) {
 	mux := http.NewServeMux()
-	mux.Handle("/", customerHandler)
+	mux.Handle("/", otelhttp.NewHandler(customerHandler, "GET /"))
 
 	srv := &http.Server{
 		Addr:              cfg.Server.HTTP.Endpoint,
