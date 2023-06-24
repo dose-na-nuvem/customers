@@ -26,7 +26,7 @@ func TestCreateCustomer(t *testing.T) {
 		return nil, nil
 	}}
 
-	lis, freeport, err := ReservaPorta(5, 50051)
+	lis, freeport, err := GetListenerWithFallback(5, 50051)
 	require.NoError(t, err)
 	defer lis.Close()
 

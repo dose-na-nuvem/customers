@@ -7,7 +7,7 @@ import (
 
 // Fechar o listener é responsabilidade de quem chama
 // para garantir que a alocação de multiplas portas aleatórias não colidam
-func reservaPorta(porta int) (*net.TCPListener, int, error) {
+func GetListenerOnPort(porta int) (*net.TCPListener, int, error) {
 	endpoint := fmt.Sprintf("localhost:%d", porta)
 	addr, err := net.ResolveTCPAddr("tcp", endpoint)
 	if err != nil {
@@ -21,13 +21,15 @@ func reservaPorta(porta int) (*net.TCPListener, int, error) {
 	return l, l.Addr().(*net.TCPAddr).Port, nil
 }
 
-func reservaPortaLivre() (*net.TCPListener, int, error) {
-	return reservaPorta(0)
+// obtem um listener em porta livre
+func GetListenerOnFreePort() (*net.TCPListener, int, error) {
+	return GetListenerOnPort(0)
 }
 
-func ReservaPorta(maxTries, fallback int) (*net.TCPListener, int, error) {
+// obtem um listener em porta livre com retry e fallback
+func GetListenerWithFallback(maxTries, fallback int) (*net.TCPListener, int, error) {
 	for i := 0; i < maxTries; i++ {
-		l, port, err := reservaPortaLivre()
+		l, port, err := GetListenerOnFreePort()
 
 		if err == nil {
 			return l, port, nil
@@ -35,5 +37,5 @@ func ReservaPorta(maxTries, fallback int) (*net.TCPListener, int, error) {
 	}
 
 	// ultima tentativa com a porta fallback
-	return reservaPorta(fallback)
+	return GetListenerOnPort(fallback)
 }
