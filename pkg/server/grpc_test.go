@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"net"
 	"testing"
 	"time"
 
@@ -27,10 +26,9 @@ func TestCreateCustomer(t *testing.T) {
 		return nil, nil
 	}}
 
-	// TODO: alocar um porta livre
-	// TODO: fechar o socket ao terminar o teste
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 50051))
+	lis, freeport, err := GetListenerWithFallback(5, 50051)
 	require.NoError(t, err)
+	defer lis.Close()
 
 	// TODO: ver quais ServerOption podemos colocar como propriedades no arquivo de configuração
 	s := grpc.NewServer()
@@ -49,7 +47,8 @@ func TestCreateCustomer(t *testing.T) {
 
 	// prepara a parte de cliente
 	// TODO: usar a porta dinamica do socket
-	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	endpoint := fmt.Sprintf("localhost:%d", freeport)
+	conn, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	defer conn.Close()
 
