@@ -9,6 +9,7 @@ import (
 	"github.com/dose-na-nuvem/customers/proto/customer"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // TODO: criar um construtor
@@ -49,6 +50,32 @@ func NewGRPC(cfg *config.Cfg, store CustomerStore) (*GRPC, error) {
 	customer.RegisterCustomerServer(grpcServer, grpc)
 
 	return grpc, nil
+}
+
+func buildServerOptions(cfg *config.Cfg) ([]grpc.ServerOption, error) {
+	var opts []grpc.ServerOption
+
+	// tls certificates
+	if cfg.Server.TLS.CertFile != "" && cfg.Server.TLS.CertKeyFile != "" {
+		creds, err := credentials.NewServerTLSFromFile(cfg.Server.TLS.CertFile,
+			cfg.Server.TLS.CertKeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("%s, %w", errNoTLSConfig, err)
+		}
+
+		opts = append(opts, grpc.Creds(creds))
+	} else {
+		if cfg.Server.TLS.Insecure {
+			cfg.Logger.Info("Servidor sem configurações de TLS! Este servidor está inseguro!")
+		} else {
+			return nil, errNoTLSConfig
+		}
+	}
+
+	// other configurations
+	// ...
+
+	return opts, nil
 }
 
 func (g *GRPC) Start(_ context.Context) error {
