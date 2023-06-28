@@ -26,6 +26,16 @@ install-tools:
 	@unzip protoc-23.2-linux-x86_64.zip -d ${HOME}/.local
 	@go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.30
 	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3
+	@go install github.com/cloudflare/cfssl/cmd/cfssl
+	@go install github.com/cloudflare/cfssl/cmd/cfssljson
+
+.PHONY: cert
+cert:
+	@mkdir -p ./tmp
+	@echo '{ "hosts": [ "localhost", "127.0.0.1" ], "key": { "algo": "rsa", "size": 2048 }, "names": [ { "O": "Customers (Projeto Dose na Nuvem)" } ]}' > ./tmp/ca-csr.json
+	@cfssl genkey -initca ./tmp/ca-csr.json | cfssljson -bare ./tmp/ca
+	@echo '{ "hosts": [ "localhost", "127.0.0.1" ], "key": { "algo": "rsa", "size": 2048 }, "names": [ { "O": "Customers (Projeto Dose na Nuvem)" } ]}' > ./tmp/cert-csr.json
+	@cfssl gencert -ca ./tmp/ca.pem -ca-key ./tmp/ca-key.pem ./tmp/cert-csr.json | cfssljson -bare ./tmp/cert
 
 .PHONY: protoc
 protoc:
