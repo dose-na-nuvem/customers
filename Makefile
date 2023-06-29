@@ -17,6 +17,7 @@ build:
 
 .PHONY: air
 air:
+	@if ! air version &> /dev/null; then go install github.com/cosmtrek/air@v1.44.0; fi
 	@air
 
 .PHONY: install-tools
