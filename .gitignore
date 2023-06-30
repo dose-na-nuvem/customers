@@ -27,6 +27,7 @@ _build
 # ignora gerados por proto
 *.pb.go
 
-protoc-23.2-linux-x86_64.zip
+protoc-*.zip
 
 tmp/
+local/
