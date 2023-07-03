@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/dose-na-nuvem/customers/pkg/model"
+	"github.com/dose-na-nuvem/customers/pkg/telemetry"
 	"go.uber.org/zap"
 )
 
@@ -41,6 +42,9 @@ func (h *CustomerHandler) createCustomer(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	name := r.PostForm.Get("name")
+
+	_, span := telemetry.GetTracer().Start(r.Context(), "create-customer")
+	defer span.End()
 	_, err = h.store.CreateCustomer(name)
 	if err != nil {
 		h.logger.Warn("falha ao criar um customer", zap.Error(err))

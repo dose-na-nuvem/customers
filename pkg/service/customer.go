@@ -7,6 +7,8 @@ import (
 	"github.com/dose-na-nuvem/customers/config"
 	"github.com/dose-na-nuvem/customers/pkg/model"
 	"github.com/dose-na-nuvem/customers/pkg/server"
+	"github.com/dose-na-nuvem/customers/pkg/telemetry"
+	"go.opentelemetry.io/otel"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -26,33 +28,49 @@ func New(cfg *config.Cfg) *Customer {
 func (c *Customer) Start(ctx context.Context) error {
 	var err error
 
+	tp, err := telemetry.NewTracerProvider()
+	if err != nil {
+		return fmt.Errorf("falha ao iniciar os rastreadores: %w", err)
+	}
+	otel.SetTracerProvider(tp)
+
+	// este rastreador é somente para o processo de bootstrapping
+	tr := tp.Tracer("bootstap")
+
+	ctx, rootSpan := tr.Start(ctx, "bootstrap")
+
+	_, span := tr.Start(ctx, "db/open")
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		return fmt.Errorf("falha ao conectar ao banco de dados: %w", err)
 	}
+	span.End()
 
 	// Migrate the schema
+	_, span = tr.Start(ctx, "db/migrate")
 	if err := db.AutoMigrate(&model.Customer{}); err != nil {
 		return fmt.Errorf("falha ao migrar o esquema do banco de dados: %w", err)
 	}
+	span.End()
+
+	rootSpan.End()
 
 	store := model.NewStore(db)
 
 	ch := server.NewCustomerHandler(c.cfg.Logger, store)
 
-	c.grpc, err = server.NewGRPC(c.cfg, store)
-	if err != nil {
-		return fmt.Errorf("falha ao iniciar o servidor GRPC: %w", err)
-	}
-	if err = c.grpc.Start(ctx); err != nil {
-		return fmt.Errorf("falha ao inicia o servidor GRPC: %w", err)
-	}
+	// c.grpc, err = server.NewGRPC(c.cfg, store)
+	// if err != nil {
+	// 	return fmt.Errorf("falha ao iniciar o servidor GRPC: %w", err)
+	// }
+	// if err = c.grpc.Start(ctx); err != nil {
+	// 	return fmt.Errorf("falha ao inicia o servidor GRPC: %w", err)
+	// }
 
 	c.srv, err = server.NewHTTP(c.cfg, ch)
 	if err != nil {
 		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
 	}
-
 	if err = c.srv.Start(ctx); err != nil {
 		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
 	}
