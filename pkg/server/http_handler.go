@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/dose-na-nuvem/customers/pkg/model"
@@ -12,6 +13,7 @@ var _ http.Handler = (*CustomerHandler)(nil)
 
 type CustomerStore interface {
 	CreateCustomer(string) (*model.Customer, error)
+	ListCustomers() ([]model.Customer, error)
 }
 
 type CustomerHandler struct {
@@ -50,4 +52,26 @@ func (h *CustomerHandler) createCustomer(w http.ResponseWriter, r *http.Request)
 		h.logger.Warn("falha ao criar um customer", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+func (h *CustomerHandler) listCustomers(w http.ResponseWriter, r *http.Request) {
+	
+	_, span := telemetry.GetTracer().Start(r.Context(), "list-customers")
+	defer span.End()
+
+	c, err := h.store.ListCustomers()
+	if err != nil {
+		h.logger.Warn("Falha ao consultar customers", zap.Error(err))	
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	b, err :=json.Marshal(c)
+	if err != nil {
+		h.logger.Warn("Falha ao serializar customers", zap.Error(err))	
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json") 
+	w.Write(b)
+	
 }
