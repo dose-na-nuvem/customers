@@ -1,10 +1,15 @@
 package server
 
 import (
+	"context"
+	"fmt"
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/dose-na-nuvem/customers/config"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 )
@@ -65,4 +70,44 @@ func TestHTTPWithInsecureServer(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestHTTP_NonBlockingStartSuccessful(t *testing.T) {
+	var err error
+	// prepare
+	ctx := context.Background()
+	errChannel := make(chan error)
+	srv := &http.Server{
+		ReadHeaderTimeout: 1 * time.Second,
+	}
+
+	listener, port, err := GetListenerWithFallback(3, 43678)
+	require.NoError(t, err, "não foi possivel alocar uma porta livre")
+	defer listener.Close()
+	freePortEndpoint := fmt.Sprintf("localhost:%d", port)
+	// freePortEndpoint = "localhost:8080"
+
+	cfg := config.New()
+	cfg.Server.HTTP.ReadHeaderTimeout = 1 * time.Second
+	cfg.Server.HTTP.Endpoint = freePortEndpoint
+
+	h := &HTTP{
+		logger:      cfg.Logger,
+		shutdownCh:  make(chan struct{}),
+		srv:         srv,
+		certFile:    cfg.Server.TLS.CertFile,
+		certKeyFile: cfg.Server.TLS.CertKeyFile,
+	}
+
+	// act
+	h.Start(ctx, errChannel)
+
+	// assert
+	time.Sleep(time.Millisecond * 500)
+	assert.Empty(t, errChannel, "o http iniciou com sucesso")
+
+	// assert
+	// time.Sleep(time.Second * 1)
+	err = h.Shutdown(ctx)
+	assert.NoError(t, err, "não deve ter erro se foi inicializado corretamente")
 }

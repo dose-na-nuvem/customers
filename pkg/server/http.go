@@ -3,9 +3,11 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/dose-na-nuvem/customers/config"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 )
 
@@ -23,7 +25,7 @@ type HTTP struct {
 
 func NewHTTP(cfg *config.Cfg, customerHandler http.Handler) (*HTTP, error) {
 	mux := http.NewServeMux()
-	mux.Handle("/", customerHandler)
+	mux.Handle("/", otelhttp.NewHandler(customerHandler, "GET /"))
 
 	srv := &http.Server{
 		Addr:              cfg.Server.HTTP.Endpoint,
@@ -57,19 +59,21 @@ func HTTPWithServer(cfg *config.Cfg, srv *http.Server) (*HTTP, error) {
 	}, nil
 }
 
-func (h *HTTP) Start(_ context.Context) error {
+func (h *HTTP) Start(_ context.Context, errorChan chan error) {
 	var err error
-	if h.certFile != "" && h.certKeyFile != "" {
-		err = h.srv.ListenAndServeTLS(h.certFile, h.certKeyFile)
-	} else {
-		err = h.srv.ListenAndServe()
-	}
 
-	if err == http.ErrServerClosed {
-		return nil
-	}
+	go func() {
+		if h.certFile != "" && h.certKeyFile != "" {
+			err = h.srv.ListenAndServeTLS(h.certFile, h.certKeyFile)
+		} else {
+			err = h.srv.ListenAndServe()
+		}
 
-	return err
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			h.logger.Error("falha ao iniciar o servidor HTTP", zap.Error(err))
+			errorChan <- fmt.Errorf("falha ao iniciar o servidor HTTP %w", err)
+		}
+	}()
 }
 
 func (h *HTTP) Shutdown(ctx context.Context) error {

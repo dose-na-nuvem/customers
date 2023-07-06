@@ -2,9 +2,7 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,8 +10,9 @@ import (
 	"github.com/dose-na-nuvem/customers/config"
 	"github.com/dose-na-nuvem/customers/pkg/model"
 	"github.com/dose-na-nuvem/customers/pkg/server"
+	"github.com/dose-na-nuvem/customers/pkg/telemetry"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -36,45 +35,65 @@ func New(cfg *config.Cfg) *Customer {
 	}
 }
 
+func (c *Customer) bootstrap(ctx context.Context) (server.CustomerStore, error) {
+	// este rastreador é somente para o processo de bootstrapping
+
+	tr := otel.GetTracerProvider().Tracer("bootstrap")
+
+	ctx, rootSpan := tr.Start(ctx, "bootstrap")
+
+	_, span := tr.Start(ctx, "db/open")
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("falha ao conectar ao banco de dados: %w", err)
+	}
+	span.End()
+
+	// Migrate the schema
+	_, span = tr.Start(ctx, "db/migrate")
+	if err := db.AutoMigrate(&model.Customer{}); err != nil {
+		return nil, fmt.Errorf("falha ao migrar o esquema do banco de dados: %w", err)
+	}
+	span.End()
+
+	rootSpan.End()
+
+	return model.NewStore(db), nil
+}
+
 func (c *Customer) Start(ctx context.Context) error {
 	var err error
 
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	tp, err := telemetry.NewTracerProvider()
 	if err != nil {
-		return fmt.Errorf("falha ao conectar ao banco de dados: %w", err)
+		return fmt.Errorf("falha ao iniciar os rastreadores: %w", err)
 	}
+	otel.SetTracerProvider(tp)
 
-	// Migrate the schema
-	if err := db.AutoMigrate(&model.Customer{}); err != nil {
-		return fmt.Errorf("falha ao migrar o esquema do banco de dados: %w", err)
+	store, err := c.bootstrap(ctx)
+	if err != nil {
+		return err
 	}
-
-	store := model.NewStore(db)
-
 	ch := server.NewCustomerHandler(c.cfg.Logger, store)
 
 	c.grpc, err = server.NewGRPC(c.cfg, store)
 	if err != nil {
 		return fmt.Errorf("falha ao iniciar o servidor GRPC: %w", err)
 	}
-	go func() {
-		if grpcErr := c.grpc.Start(ctx); !errors.Is(grpcErr, grpc.ErrServerStopped) {
-			c.cfg.Logger.Error("falha ao iniciar o servidor GRPC", zap.Error(grpcErr))
-			c.asyncErrorChannel <- grpcErr
-		}
-	}()
+	c.grpc.Start(ctx, c.asyncErrorChannel)
 
 	c.srv, err = server.NewHTTP(c.cfg, ch)
 	if err != nil {
 		return fmt.Errorf("falha ao iniciar o servidor HTTP: %w", err)
 	}
+	c.srv.Start(ctx, c.asyncErrorChannel)
 
-	go func() {
-		if httpErr := c.srv.Start(ctx); !errors.Is(httpErr, http.ErrServerClosed) {
-			c.cfg.Logger.Error("falha ao iniciar o servidor HTTP", zap.Error(httpErr))
-			c.asyncErrorChannel <- httpErr
-		}
-	}()
+	// go func() {
+	// 	if httpErr := c.srv.Start(ctx); !errors.Is(httpErr, http.ErrServerClosed) {
+	// 		c.cfg.Logger.Error("falha ao iniciar o servidor HTTP", zap.Error(httpErr))
+	// 		c.asyncErrorChannel <- httpErr
+	// 	}
+	// }()
 
 	signal.Notify(c.signalsChannel, os.Interrupt, syscall.SIGTERM)
 	defer signal.Stop(c.signalsChannel)

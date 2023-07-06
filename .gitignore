@@ -26,3 +26,8 @@ _build
 
 # ignora gerados por proto
 *.pb.go
+
+protoc-*.zip
+
+tmp/
+local/

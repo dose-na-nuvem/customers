@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/dose-na-nuvem/customers/proto/customer"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // TODO: criar um construtor
@@ -51,17 +53,44 @@ func NewGRPC(cfg *config.Cfg, store CustomerStore) (*GRPC, error) {
 	return grpc, nil
 }
 
-func (g *GRPC) Start(_ context.Context) error {
+func buildServerOptions(cfg *config.Cfg) ([]grpc.ServerOption, error) {
+	var opts []grpc.ServerOption
+
+	// tls certificates
+	if cfg.Server.TLS.CertFile != "" && cfg.Server.TLS.CertKeyFile != "" {
+		creds, err := credentials.NewServerTLSFromFile(cfg.Server.TLS.CertFile,
+			cfg.Server.TLS.CertKeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("%s, %w", errNoTLSConfig, err)
+		}
+
+		opts = append(opts, grpc.Creds(creds))
+	} else {
+		if cfg.Server.TLS.Insecure {
+			cfg.Logger.Info("Servidor sem configurações de TLS! Este servidor está inseguro!")
+		} else {
+			return nil, errNoTLSConfig
+		}
+	}
+
+	// other configurations
+	// ...
+
+	return opts, nil
+}
+
+func (g *GRPC) Start(_ context.Context, chErr chan error) {
 	g.logger.Info("iniciando servidor gRPC")
-	return g.grpc.Serve(g.listener)
+	go func() {
+		err := g.grpc.Serve(g.listener)
+		if err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+			chErr <- fmt.Errorf("falha ao iniciar o servidor GRPC: %w", err)
+		}
+	}()
 }
 
 func (g *GRPC) Shutdown(_ context.Context) error {
 	g.logger.Info("finalizando servidor gRPC")
 	g.grpc.GracefulStop()
-	err := g.listener.Close()
-	if err != nil {
-		return err
-	}
 	return nil
 }

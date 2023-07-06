@@ -20,9 +20,9 @@ type Database struct {
 }
 
 type ServerSettings struct {
-	HTTP HTTPServerSettings  `mapstructure:"http"`
-	GRPC *GRPCServerSettings `mapstructure:"grpc"`
-	TLS  *TLSSettings        `mapstructure:"tls"`
+	HTTP HTTPServerSettings `mapstructure:"http"`
+	GRPC GRPCServerSettings `mapstructure:"grpc"`
+	TLS  *TLSSettings       `mapstructure:"tls"`
 }
 
 type HTTPServerSettings struct {
