@@ -85,7 +85,6 @@ func TestHTTP_NonBlockingStartSuccessful(t *testing.T) {
 	require.NoError(t, err, "não foi possivel alocar uma porta livre")
 	defer listener.Close()
 	freePortEndpoint := fmt.Sprintf("localhost:%d", port)
-	// freePortEndpoint = "localhost:8080"
 
 	cfg := config.New()
 	cfg.Server.HTTP.ReadHeaderTimeout = 1 * time.Second
@@ -93,7 +92,6 @@ func TestHTTP_NonBlockingStartSuccessful(t *testing.T) {
 
 	h := &HTTP{
 		logger:      cfg.Logger,
-		shutdownCh:  make(chan struct{}),
 		srv:         srv,
 		certFile:    cfg.Server.TLS.CertFile,
 		certKeyFile: cfg.Server.TLS.CertKeyFile,

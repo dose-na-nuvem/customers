@@ -16,8 +16,7 @@ var errNoTLSConfig = errors.New("servidor sem configuração de TLS")
 type HTTP struct {
 	logger *zap.Logger
 
-	shutdownCh chan struct{}
-	srv        *http.Server
+	srv *http.Server
 
 	certFile    string
 	certKeyFile string
@@ -38,13 +37,13 @@ func NewHTTP(cfg *config.Cfg, customerHandler http.Handler) (*HTTP, error) {
 
 func HTTPWithServer(cfg *config.Cfg, srv *http.Server) (*HTTP, error) {
 	if cfg.Server.TLS.CertFile != "" && cfg.Server.TLS.CertKeyFile != "" {
-		cfg.Logger.Info("Servidor configurado com opções TLS",
+		cfg.Logger.Info("Servidor HTTP configurado com opções TLS",
 			zap.String("cert_file", cfg.Server.TLS.CertFile),
 			zap.String("cert_key_file", cfg.Server.TLS.CertKeyFile),
 		)
 	} else {
 		if cfg.Server.TLS.Insecure {
-			cfg.Logger.Info("Servidor sem configurações de TLS! Este servidor está inseguro!")
+			cfg.Logger.Info("Servidor HTTP sem configurações de TLS! Este servidor está inseguro!")
 		} else {
 			return nil, errNoTLSConfig
 		}
@@ -52,7 +51,6 @@ func HTTPWithServer(cfg *config.Cfg, srv *http.Server) (*HTTP, error) {
 
 	return &HTTP{
 		logger:      cfg.Logger,
-		shutdownCh:  make(chan struct{}),
 		srv:         srv,
 		certFile:    cfg.Server.TLS.CertFile,
 		certKeyFile: cfg.Server.TLS.CertKeyFile,
@@ -82,8 +80,6 @@ func (h *HTTP) Shutdown(ctx context.Context) error {
 		// Error from closing listeners, or context timeout:
 		return err
 	}
-
-	close(h.shutdownCh)
 
 	return nil
 }
