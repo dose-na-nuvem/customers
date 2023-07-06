@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/dose-na-nuvem/customers/config"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -29,7 +30,7 @@ func NewHTTP(cfg *config.Cfg, customerHandler http.Handler) (*HTTP, error) {
 	srv := &http.Server{
 		Addr:              cfg.Server.HTTP.Endpoint,
 		Handler:           mux,
-		ReadHeaderTimeout: cfg.Server.HTTP.ReadHeaderTimeout,
+		ReadHeaderTimeout: cfg.Server.HTTP.ReadHeaderTimeout * time.Millisecond,
 	}
 
 	return HTTPWithServer(cfg, srv)

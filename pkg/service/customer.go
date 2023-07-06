@@ -88,13 +88,6 @@ func (c *Customer) Start(ctx context.Context) error {
 	}
 	c.srv.Start(ctx, c.asyncErrorChannel)
 
-	// go func() {
-	// 	if httpErr := c.srv.Start(ctx); !errors.Is(httpErr, http.ErrServerClosed) {
-	// 		c.cfg.Logger.Error("falha ao iniciar o servidor HTTP", zap.Error(httpErr))
-	// 		c.asyncErrorChannel <- httpErr
-	// 	}
-	// }()
-
 	signal.Notify(c.signalsChannel, os.Interrupt, syscall.SIGTERM)
 	defer signal.Stop(c.signalsChannel)
 
