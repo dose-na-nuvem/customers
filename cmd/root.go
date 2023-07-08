@@ -13,7 +13,7 @@ import (
 var (
 	configFile     string
 	cfg            = config.New()
-	defaultTimeout = 2000
+	defaultTimeout = 2 * time.Second
 )
 
 // rootCmd represents the base command when called without any subcommands.
@@ -51,7 +51,7 @@ func Execute() {
 
 	startCmd.Flags().DurationVar(&cfg.Server.HTTP.ReadHeaderTimeout, "server.http.readheadertimeout",
 		time.Duration(defaultTimeout),
-		"Tempo máximo de leitura dos headers de uma requisição em milissegundos")
+		"Tempo máximo de leitura dos headers de uma requisição (Duration)")
 
 	startCmd.Flags().StringVar(&cfg.Server.TLS.CertFile, "server.tls.certfile", "", "caminho do certificado.")
 
