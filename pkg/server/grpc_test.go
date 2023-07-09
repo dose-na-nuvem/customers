@@ -48,7 +48,6 @@ func TestCreateCustomer(t *testing.T) {
 	}()
 
 	// prepara a parte de cliente
-	// TODO: usar a porta dinamica do socket
 	endpoint := fmt.Sprintf("localhost:%d", freeport)
 	conn, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
@@ -207,8 +206,10 @@ func TestGRPC_NonBlockingStartSuccessful(t *testing.T) {
 	g.Start(ctx, errorChannel)
 
 	// assert
-	time.Sleep(time.Millisecond * 500)
 	assert.Empty(t, errorChannel, "o grpc iniciou com sucesso")
+	assert.Eventually(t, func() bool {
+		return assert.Empty(t, errorChannel, "o grpc iniciou com sucesso")
+	}, 300*time.Millisecond, 20*time.Millisecond, "o http falhou")
 
 	// assert
 	// time.Sleep(time.Second * 1)

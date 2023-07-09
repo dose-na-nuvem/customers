@@ -115,7 +115,6 @@ func (c *Customer) Shutdown(ctx context.Context) error {
 		return fmt.Errorf("erro ao finalizar o serviço: %w", err)
 	}
 
-	// TODO: finalizar o servidor gRPC
 	if err := c.grpc.Shutdown(ctx); err != nil {
 		return fmt.Errorf("erro ao finalizar o serviço: %w", err)
 	}

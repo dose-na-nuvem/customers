@@ -104,11 +104,11 @@ func TestHTTP_NonBlockingStartSuccessful(t *testing.T) {
 	h.Start(ctx, errChannel)
 
 	// assert
-	time.Sleep(time.Millisecond * 500)
-	assert.Empty(t, errChannel, "o http iniciou com sucesso")
+	assert.Eventually(t, func() bool {
+		return assert.Empty(t, errChannel, "o http iniciou com sucesso")
+	}, 300*time.Millisecond, 20*time.Millisecond, "o http falhou")
 
 	// assert
-	// time.Sleep(time.Second * 1)
 	err = h.Shutdown(ctx)
 	assert.NoError(t, err, "não deve ter erro se foi inicializado corretamente")
 }

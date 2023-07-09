@@ -13,7 +13,6 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-// TODO: criar um construtor
 type GRPC struct {
 	customer.UnimplementedCustomerServer
 	logger   *zap.Logger
