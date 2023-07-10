@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/dose-na-nuvem/customers/config"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -15,8 +17,7 @@ var errNoTLSConfig = errors.New("servidor sem configuração de TLS")
 type HTTP struct {
 	logger *zap.Logger
 
-	shutdownCh chan struct{}
-	srv        *http.Server
+	srv *http.Server
 
 	certFile    string
 	certKeyFile string
@@ -29,7 +30,7 @@ func NewHTTP(cfg *config.Cfg, customerHandler http.Handler) (*HTTP, error) {
 	srv := &http.Server{
 		Addr:              cfg.Server.HTTP.Endpoint,
 		Handler:           mux,
-		ReadHeaderTimeout: cfg.Server.HTTP.ReadHeaderTimeout,
+		ReadHeaderTimeout: cfg.Server.HTTP.ReadHeaderTimeout * time.Millisecond,
 	}
 
 	return HTTPWithServer(cfg, srv)
@@ -37,13 +38,13 @@ func NewHTTP(cfg *config.Cfg, customerHandler http.Handler) (*HTTP, error) {
 
 func HTTPWithServer(cfg *config.Cfg, srv *http.Server) (*HTTP, error) {
 	if cfg.Server.TLS.CertFile != "" && cfg.Server.TLS.CertKeyFile != "" {
-		cfg.Logger.Info("Servidor configurado com opções TLS",
+		cfg.Logger.Info("Servidor HTTP configurado com opções TLS",
 			zap.String("cert_file", cfg.Server.TLS.CertFile),
 			zap.String("cert_key_file", cfg.Server.TLS.CertKeyFile),
 		)
 	} else {
 		if cfg.Server.TLS.Insecure {
-			cfg.Logger.Info("Servidor sem configurações de TLS! Este servidor está inseguro!")
+			cfg.Logger.Info("Servidor HTTP sem configurações de TLS! Este servidor está inseguro!")
 		} else {
 			return nil, errNoTLSConfig
 		}
@@ -51,26 +52,27 @@ func HTTPWithServer(cfg *config.Cfg, srv *http.Server) (*HTTP, error) {
 
 	return &HTTP{
 		logger:      cfg.Logger,
-		shutdownCh:  make(chan struct{}),
 		srv:         srv,
 		certFile:    cfg.Server.TLS.CertFile,
 		certKeyFile: cfg.Server.TLS.CertKeyFile,
 	}, nil
 }
 
-func (h *HTTP) Start(_ context.Context) error {
+func (h *HTTP) Start(_ context.Context, errorChan chan error) {
 	var err error
-	if h.certFile != "" && h.certKeyFile != "" {
-		err = h.srv.ListenAndServeTLS(h.certFile, h.certKeyFile)
-	} else {
-		err = h.srv.ListenAndServe()
-	}
 
-	if err == http.ErrServerClosed {
-		return nil
-	}
+	go func() {
+		if h.certFile != "" && h.certKeyFile != "" {
+			err = h.srv.ListenAndServeTLS(h.certFile, h.certKeyFile)
+		} else {
+			err = h.srv.ListenAndServe()
+		}
 
-	return err
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			h.logger.Error("falha ao iniciar o servidor HTTP", zap.Error(err))
+			errorChan <- fmt.Errorf("falha ao iniciar o servidor HTTP %w", err)
+		}
+	}()
 }
 
 func (h *HTTP) Shutdown(ctx context.Context) error {
@@ -79,8 +81,6 @@ func (h *HTTP) Shutdown(ctx context.Context) error {
 		// Error from closing listeners, or context timeout:
 		return err
 	}
-
-	close(h.shutdownCh)
 
 	return nil
 }

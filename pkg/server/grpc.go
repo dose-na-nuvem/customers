@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 
@@ -12,7 +13,6 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-// TODO: criar um construtor
 type GRPC struct {
 	customer.UnimplementedCustomerServer
 	logger   *zap.Logger
@@ -78,17 +78,18 @@ func buildServerOptions(cfg *config.Cfg) ([]grpc.ServerOption, error) {
 	return opts, nil
 }
 
-func (g *GRPC) Start(_ context.Context) error {
+func (g *GRPC) Start(_ context.Context, chErr chan error) {
 	g.logger.Info("iniciando servidor gRPC")
-	return g.grpc.Serve(g.listener)
+	go func() {
+		err := g.grpc.Serve(g.listener)
+		if err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+			chErr <- fmt.Errorf("falha ao iniciar o servidor GRPC: %w", err)
+		}
+	}()
 }
 
 func (g *GRPC) Shutdown(_ context.Context) error {
 	g.logger.Info("finalizando servidor gRPC")
 	g.grpc.GracefulStop()
-	err := g.listener.Close()
-	if err != nil {
-		return err
-	}
 	return nil
 }

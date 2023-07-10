@@ -48,7 +48,6 @@ func TestCreateCustomer(t *testing.T) {
 	}()
 
 	// prepara a parte de cliente
-	// TODO: usar a porta dinamica do socket
 	endpoint := fmt.Sprintf("localhost:%d", freeport)
 	conn, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
@@ -186,4 +185,34 @@ func TestGRPCServerInsecure(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGRPC_NonBlockingStartSuccessful(t *testing.T) {
+	// arrange
+	ctx := context.Background()
+	errorChannel := make(chan error, 1) // buffered
+
+	lis, _, err := GetListenerWithFallback(3, 40404)
+	require.NoError(t, err, "não foi possivel usar uma porta livre ")
+
+	g := &GRPC{
+		logger:   zap.NewNop(),
+		store:    &mockStore{},
+		grpc:     grpc.NewServer(),
+		listener: lis,
+	}
+
+	// act
+	g.Start(ctx, errorChannel)
+
+	// assert
+	assert.Empty(t, errorChannel, "o grpc iniciou com sucesso")
+	assert.Eventually(t, func() bool {
+		return assert.Empty(t, errorChannel, "o grpc iniciou com sucesso")
+	}, 300*time.Millisecond, 20*time.Millisecond, "o http falhou")
+
+	// assert
+	// time.Sleep(time.Second * 1)
+	err = g.Shutdown(ctx)
+	assert.NoError(t, err, "não deve ter erro se foi inicializado corretamente")
 }

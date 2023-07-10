@@ -1,10 +1,15 @@
 package server
 
 import (
+	"context"
+	"fmt"
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/dose-na-nuvem/customers/config"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 )
@@ -59,10 +64,51 @@ func TestHTTPWithInsecureServer(t *testing.T) {
 			// verify
 			if tC.insecure {
 				assert.Len(t, logs.All(), 1)
-				assert.Contains(t, "Servidor sem configurações de TLS! Este servidor está inseguro!", logs.All()[0].Message)
+				assert.Contains(t, "Servidor HTTP sem configurações de TLS! Este servidor está inseguro!", logs.All()[0].Message)
 			} else {
 				assert.Equal(t, errNoTLSConfig, err)
 			}
 		})
 	}
+}
+
+// flaky test
+func TestHTTP_NonBlockingStartSuccessful(t *testing.T) {
+	var err error
+	// prepare
+	ctx := context.Background()
+	errChannel := make(chan error)
+
+	listener, port, err := GetListenerWithFallback(3, 43678)
+	require.NoError(t, err, "não foi possivel alocar uma porta livre")
+	listener.Close()
+	freePortEndpoint := fmt.Sprintf("localhost:%d", port)
+
+	cfg := config.New()
+	cfg.Server.HTTP.ReadHeaderTimeout = 1 * time.Second
+	cfg.Server.HTTP.Endpoint = freePortEndpoint
+
+	srv := &http.Server{
+		Addr:              freePortEndpoint,
+		ReadHeaderTimeout: 2 * time.Second,
+	}
+
+	h := &HTTP{
+		logger:      cfg.Logger,
+		srv:         srv,
+		certFile:    cfg.Server.TLS.CertFile,
+		certKeyFile: cfg.Server.TLS.CertKeyFile,
+	}
+
+	// act
+	h.Start(ctx, errChannel)
+
+	// assert
+	assert.Eventually(t, func() bool {
+		return assert.Empty(t, errChannel, "o http iniciou com sucesso")
+	}, 300*time.Millisecond, 20*time.Millisecond, "o http falhou")
+
+	// assert
+	err = h.Shutdown(ctx)
+	assert.NoError(t, err, "não deve ter erro se foi inicializado corretamente")
 }
