@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/dose-na-nuvem/customers/config"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
