@@ -57,23 +57,25 @@ func (h *CustomerHandler) createCustomer(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *CustomerHandler) listCustomers(w http.ResponseWriter, r *http.Request) {
-	
 	_, span := telemetry.GetTracer().Start(r.Context(), "list-customers")
 	defer span.End()
 
 	c, err := h.store.ListCustomers()
 	if err != nil {
-		h.logger.Warn("Falha ao consultar customers", zap.Error(err))	
+		h.logger.Warn("Falha ao consultar customers", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	b, err :=json.Marshal(c)
+	b, err := json.Marshal(c)
 	if err != nil {
-		h.logger.Warn("Falha ao serializar customers", zap.Error(err))	
+		h.logger.Warn("Falha ao serializar customers", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	w.Header().Set("Content-Type", "application/json") 
-	w.Write(b)
-	
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(b)
+	if err != nil {
+		h.logger.Error("Falha ao escrever resposta da requisição")
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }

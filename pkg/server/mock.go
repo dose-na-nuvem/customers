@@ -4,7 +4,7 @@ import "github.com/dose-na-nuvem/customers/pkg/model"
 
 type mockStore struct {
 	createCustomerFunc func(name string) (*model.Customer, error)
-	listCustomersFunc func() ([]model.Customer, error)
+	listCustomersFunc  func() ([]model.Customer, error)
 }
 
 func (m *mockStore) CreateCustomer(name string) (*model.Customer, error) {

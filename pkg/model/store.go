@@ -25,6 +25,6 @@ func (s *CustomerStore) CreateCustomer(name string) (*Customer, error) {
 func (s *CustomerStore) ListCustomers() ([]Customer, error) {
 	var customers []Customer
 	result := s.db.Find(&customers)
-	
+
 	return customers, result.Error
 }

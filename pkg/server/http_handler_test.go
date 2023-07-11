@@ -79,14 +79,14 @@ type ResponseWriterMock struct {
 }
 
 func TestListCustomers(t *testing.T) {
-	//prepare
+	// prepare
 	called := false
 	st := &mockStore{
-	listCustomersFunc: func() ([]model.Customer, error) {
-		called = true
+		listCustomersFunc: func() ([]model.Customer, error) {
+			called = true
 
-		return nil, nil
-	}}
+			return nil, nil
+		}}
 
 	mux := http.NewServeMux()
 	mux.Handle("/", NewCustomerHandler(zap.NewNop(), st))
@@ -100,7 +100,6 @@ func TestListCustomers(t *testing.T) {
 	ctx := context.Background()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL, nil)
 	require.NoError(t, err)
-	//req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := client.Do(req)
 	require.NoError(t, err)
@@ -114,5 +113,3 @@ func TestListCustomers(t *testing.T) {
 func (r *ResponseWriterMock) Write([]byte) (int, error) {
 	return 0, errors.New("boo")
 }
-
-
