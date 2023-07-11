@@ -19,10 +19,11 @@ import (
 func TestNewCustomer(t *testing.T) {
 	// prepare
 	called := false
+	customerName := "Fulano de tal"
 	st := &mockStore{createCustomerFunc: func(name string) (*model.Customer, error) {
 		called = true
 
-		assert.Equal(t, "Fulano de Tal", name)
+		assert.Equal(t, customerName, name)
 
 		return nil, nil
 	}}
@@ -38,7 +39,7 @@ func TestNewCustomer(t *testing.T) {
 	// test
 	ctx := context.Background()
 	form := make(url.Values)
-	form.Add("name", "Fulano de Tal")
+	form.Add("name", customerName)
 	formReader := strings.NewReader(form.Encode())
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, ts.URL, formReader)
 	require.NoError(t, err)
@@ -63,7 +64,7 @@ func TestCustomerHandlerError(t *testing.T) {
 
 	// test
 	ctx := context.Background()
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, "", nil)
 	require.NoError(t, err)
 	h.ServeHTTP(writer, req)
 
@@ -77,6 +78,41 @@ type ResponseWriterMock struct {
 	http.ResponseWriter
 }
 
+func TestListCustomers(t *testing.T) {
+	//prepare
+	called := false
+	st := &mockStore{
+	listCustomersFunc: func() ([]model.Customer, error) {
+		called = true
+
+		return nil, nil
+	}}
+
+	mux := http.NewServeMux()
+	mux.Handle("/", NewCustomerHandler(zap.NewNop(), st))
+	ts := httptest.NewTLSServer(mux)
+
+	defer ts.Close()
+
+	client := ts.Client()
+
+	// test
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL, nil)
+	require.NoError(t, err)
+	//req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := client.Do(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	// verify
+	// verification is on the mock
+	assert.True(t, called, "mock was expected to have been called")
+}
+
 func (r *ResponseWriterMock) Write([]byte) (int, error) {
 	return 0, errors.New("boo")
 }
+
+

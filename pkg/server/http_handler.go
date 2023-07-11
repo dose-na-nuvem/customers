@@ -32,6 +32,8 @@ func (h *CustomerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		h.createCustomer(w, r)
+	case http.MethodGet:
+		h.listCustomers(w, r)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 	}
