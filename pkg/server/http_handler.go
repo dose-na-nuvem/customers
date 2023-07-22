@@ -6,6 +6,8 @@ import (
 
 	"github.com/dose-na-nuvem/customers/pkg/model"
 	"github.com/dose-na-nuvem/customers/pkg/telemetry"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -68,13 +70,18 @@ func (h *CustomerHandler) listCustomers(w http.ResponseWriter, r *http.Request) 
 
 	b, err := json.Marshal(c)
 	if err != nil {
-		h.logger.Warn("Falha ao serializar customers", zap.Error(err))
+		span.RecordError(err, trace.WithAttributes(
+			attribute.String("error.message", "Falha ao serializar customers"),
+		))
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(b)
 	if err != nil {
+		span.RecordError(err, trace.WithAttributes(
+			attribute.String("error.message", "Falha escrever a resposta da requisição"),
+		))
 		h.logger.Error("Falha ao escrever resposta da requisição")
 		w.WriteHeader(http.StatusInternalServerError)
 	}
