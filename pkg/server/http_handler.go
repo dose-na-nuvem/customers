@@ -1,10 +1,13 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/dose-na-nuvem/customers/pkg/model"
 	"github.com/dose-na-nuvem/customers/pkg/telemetry"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -12,6 +15,7 @@ var _ http.Handler = (*CustomerHandler)(nil)
 
 type CustomerStore interface {
 	CreateCustomer(string) (*model.Customer, error)
+	ListCustomers() ([]model.Customer, error)
 }
 
 type CustomerHandler struct {
@@ -30,6 +34,8 @@ func (h *CustomerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		h.createCustomer(w, r)
+	case http.MethodGet:
+		h.listCustomers(w, r)
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 	}
@@ -48,6 +54,36 @@ func (h *CustomerHandler) createCustomer(w http.ResponseWriter, r *http.Request)
 	_, err = h.store.CreateCustomer(name)
 	if err != nil {
 		h.logger.Warn("falha ao criar um customer", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (h *CustomerHandler) listCustomers(w http.ResponseWriter, r *http.Request) {
+	_, span := telemetry.GetTracer().Start(r.Context(), "list-customers")
+	defer span.End()
+
+	c, err := h.store.ListCustomers()
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(
+			attribute.String("error.message", "Falha ao consultar customers"),
+		))
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	b, err := json.Marshal(c)
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(
+			attribute.String("error.message", "Falha ao serializar customers"),
+		))
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(b)
+	if err != nil {
+		span.RecordError(err, trace.WithAttributes(
+			attribute.String("error.message", "Falha escrever a resposta da requisição"),
+		))
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }

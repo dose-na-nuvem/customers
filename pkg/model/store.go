@@ -21,3 +21,10 @@ func (s *CustomerStore) CreateCustomer(name string) (*Customer, error) {
 	s.db.Create(c)
 	return c, nil
 }
+
+func (s *CustomerStore) ListCustomers() ([]Customer, error) {
+	var customers []Customer
+	result := s.db.Find(&customers)
+
+	return customers, result.Error
+}
