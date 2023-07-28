@@ -64,7 +64,9 @@ func (h *CustomerHandler) listCustomers(w http.ResponseWriter, r *http.Request) 
 
 	c, err := h.store.ListCustomers()
 	if err != nil {
-		h.logger.Warn("Falha ao consultar customers", zap.Error(err))
+		span.RecordError(err, trace.WithAttributes(
+			attribute.String("error.message", "Falha ao consultar customers"),
+		))
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
@@ -82,7 +84,6 @@ func (h *CustomerHandler) listCustomers(w http.ResponseWriter, r *http.Request) 
 		span.RecordError(err, trace.WithAttributes(
 			attribute.String("error.message", "Falha escrever a resposta da requisição"),
 		))
-		h.logger.Error("Falha ao escrever resposta da requisição")
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
